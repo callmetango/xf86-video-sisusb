@@ -48,8 +48,6 @@
 
 #if X_BYTE_ORDER == X_BIG_ENDIAN
 
-#warning YES!
-
 #ifdef NEED_cpu_to_le32
 static __inline CARD32 sisusb_cpu_to_le32(CARD32 v)
 {
