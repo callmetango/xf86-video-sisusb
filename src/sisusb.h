@@ -36,12 +36,12 @@
 
 #define SISUSBDRIVERVERSIONYEAR    5
 #define SISUSBDRIVERVERSIONMONTH   1
-#define SISUSBDRIVERVERSIONDAY     25
+#define SISUSBDRIVERVERSIONDAY     28
 #define SISUSBDRIVERREVISION       1
 
 #define SISUSBDRIVERIVERSION ((SISUSBDRIVERVERSIONYEAR << 16) |  \
-			     (SISUSBDRIVERVERSIONMONTH << 8) |  \
-                             SISUSBDRIVERVERSIONDAY 	       |  \
+			     (SISUSBDRIVERVERSIONMONTH << 8)  |  \
+                             SISUSBDRIVERVERSIONDAY 	      |  \
 			     (SISUSBDRIVERREVISION << 24))
 
 #undef SIS_LINUX		/* Try to find out whether platform is Linux */
@@ -66,7 +66,7 @@
 #define SISUSB_MINOR_VERSION       7
 #define SISUSB_PATCHLEVEL          0
 #define SISUSB_CURRENT_VERSION     ((SISUSB_MAJOR_VERSION << 16) | 	\
-                                   (SISUSB_MINOR_VERSION << 8) |	\
+                                   (SISUSB_MINOR_VERSION << 8)   |	\
 				   SISUSB_PATCHLEVEL)
 
 #if 0
@@ -75,15 +75,15 @@
 
 #include "xf86_ansic.h"
 #include "compiler.h"
-#include "xf86Pci.h"
 #include "xf86Priv.h"
 #include "xf86_OSproc.h"
 #include "xf86Resources.h"
 #include "xf86.h"
-#include "xf86PciInfo.h"
 #include "xf86Cursor.h"
 #include "xf86cmap.h"
 #include "xaa.h"
+
+#define SISUSB_HaveDriverFuncs 0
 
 #ifdef XORG_VERSION_CURRENT
 #include "xorgVersion.h"
@@ -92,6 +92,11 @@
 #define XF86_VERSION_NUMERIC(major,minor,patch,snap,dummy) \
 	(((major) * 10000000) + ((minor) * 100000) + ((patch) * 1000) + snap)
 #define XF86_VERSION_CURRENT XF86_VERSION_NUMERIC(4,3,99,902)
+#endif
+#ifdef HaveDriverFuncs
+#define SISUSB_HAVE_DRIVER_FUNC
+#undef  SISUSB_HaveDriverFuncs
+#define SISUSB_HaveDriverFuncs HaveDriverFuncs
 #endif
 #else
 #include "xf86Version.h"
@@ -414,12 +419,7 @@ typedef struct {
     UChar  sisCapt[0x60];
     UChar  sisVid[0x50];
     UChar  VBPart1[0x50];
-    UChar  VBPart2[0x100];
-    UChar  VBPart3[0x50];
-    UChar  VBPart4[0x50];
-    UShort ch70xx[64];
     ULong  sisMMIO85C0;
-    ULong  sisRegsPCI50, sisRegsPCIA0;
     UChar  BIOSModeSave;
 } SISUSBRegRec, *SISUSBRegPtr;
 

@@ -112,26 +112,21 @@ SiSUSBLoadCursorImage(ScrnInfoPtr pScrn, UChar *src)
     ULong cursor_addr;
     CARD32 status1 = 0;
     UChar *dest = pSiSUSB->FbBase;
-    Bool  sizedouble = FALSE;
-    int bufnum;
+    int bufnum, i;
 
     pSiSUSB->HWCursorMBufNum ^= 1;
     bufnum = 1 << pSiSUSB->HWCursorMBufNum;
 
-    if(pSiSUSB->CurrentLayout.mode->Flags & V_DBLSCAN) {
-       sizedouble = TRUE;
-    }
-
     cursor_addr = pScrn->videoRam - pSiSUSB->cursorOffset - ((pSiSUSB->CursorSize/1024) * bufnum);
 
-    if(sizedouble) {
-       int i;
+    if(pSiSUSB->CurrentLayout.mode->Flags & V_DBLSCAN) {
+       UChar *mysrc = (UChar *)pSiSUSB->USBCursorBuf +
+				(pSiSUSB->CursorSize * 4) - (pSiSUSB->CursorSize * bufnum);
        for(i = 0; i < 32; i++) {
-          SiSUSBMemCopyToVideoRam(pSiSUSB, (UChar *)dest + (cursor_addr * 1024) + (32 * i),
-	           src + (16 * i), 16);
-          SiSUSBMemCopyToVideoRam(pSiSUSB, (UChar *)dest + (cursor_addr * 1024) + (32 * i) + 16,
-	           src + (16 * i), 16);
+          memcpy(mysrc + (32 * i)     , src + (16 * i), 16);
+	  memcpy(mysrc + (32 * i) + 16, src + (16 * i), 16);
        }
+       SiSUSBMemCopyToVideoRam(pSiSUSB, (UChar *)dest + (cursor_addr * 1024), mysrc, 1024);
     } else {
        SiSUSBMemCopyToVideoRam(pSiSUSB, (UChar *)dest + (cursor_addr * 1024), src, 1024);
     }
@@ -215,7 +210,6 @@ static void SiSUSBLoadCursorImageARGB(ScrnInfoPtr pScrn, CursorPtr pCurs)
 
     if(srcwidth > 64)  srcwidth = 64;
     if(srcheight > 64) srcheight = 64;
-
 
     dest = mysrc = (CARD32 *)((UChar *)pSiSUSB->USBCursorBuf +
     			(pSiSUSB->CursorSize * 4) - (pSiSUSB->CursorSize * (2 + bufnum)));

@@ -49,14 +49,10 @@
 
 #include "sisusb_driver.h"
 
-#define _XF86DGA_SERVER_
-#include "extensions/xf86dgastr.h"
-
 #include "globals.h"
 
 #define DPMS_SERVER
 #include "extensions/dpms.h"
-
 
 /*
  * This is intentionally screen-independent.  It indicates the binding
@@ -80,6 +76,10 @@ DriverRec SISUSB = {
     SISUSBAvailableOptions,
     NULL,
     0
+#ifdef SISUSB_HAVE_DRIVER_FUNC
+     ,
+    SISUSBDriverFunc
+#endif
 };
 
 static SymTabRec SISUSBChipsets[] = {
@@ -136,7 +136,7 @@ sisusbSetup(pointer module, pointer opts, int *errmaj, int *errmin)
 
     if(!setupDone) {
        setupDone = TRUE;
-       xf86AddDriver(&SISUSB, module, 0);
+       xf86AddDriver(&SISUSB, module, SISUSB_HaveDriverFuncs);
        LoaderRefSymLists(fbSymbols, shadowSymbols, ramdacSymbols, NULL);
        return (pointer)TRUE;
     }
@@ -153,6 +153,23 @@ SISUSBIdentify(int flags)
 {
     xf86PrintChipsets(SISUSB_NAME, "driver for SiSUSB chipsets", SISUSBChipsets);
 }
+
+#ifdef SISUSB_HAVE_DRIVER_FUNC
+static Bool
+SISUSBDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr)
+{
+    CARD32 *flag;
+
+    switch(op) {
+    case GET_REQUIRED_HW_INTERFACES:
+	flag = (CARD32 *)ptr;
+	(*flag) = 0;
+	return TRUE;
+    default:
+	return FALSE;
+    }
+}
+#endif
 
 static Bool
 SISUSBGetRec(ScrnInfoPtr pScrn)
@@ -450,7 +467,7 @@ SISUSBProbe(DriverPtr drv, int flags)
             pScrn->FreeScreen       = SISUSBFreeScreen;
             pScrn->ValidMode        = SISUSBValidMode;
 #ifdef X_XF86MiscPassMessage
-    	    if(xf86GetVersion() >= XF86_VERSION_NUMERIC(4,3,99,2,0)) {
+	    if(xf86GetVersion() >= XF86_VERSION_NUMERIC(4,3,99,2,0)) {
 	       pScrn->HandleMessage = SISUSBHandleMessage;
             }
 #endif
@@ -2584,7 +2601,7 @@ SiSUSB_CheckModeCRT1(ScrnInfoPtr pScrn, DisplayModePtr mode, ULong VBFlags, Bool
       return 0xfe;
    }
 
-   return(SiSUSB_GetModeID(pSiSUSB->VGAEngine, VBFlags, mode->HDisplay, mode->VDisplay,
+   return (SiSUSB_GetModeID(pSiSUSB->VGAEngine, VBFlags, mode->HDisplay, mode->VDisplay,
    			i, pSiSUSB->FSTN, pSiSUSB->LCDwidth, pSiSUSB->LCDheight));
 }
 
@@ -2633,7 +2650,6 @@ SISUSBSearchCRT1Rate(ScrnInfoPtr pScrn, DisplayModePtr mode)
    UShort  xres = mode->HDisplay;
    UShort  yres = mode->VDisplay;
    UChar   index, defindex;
-   Bool    checksis730 = FALSE;
 
    defindex = (xres == 800 || xres == 1024 || xres == 1280) ? 0x02 : 0x01;
 
@@ -2648,23 +2664,20 @@ SISUSBSearchCRT1Rate(ScrnInfoPtr pScrn, DisplayModePtr mode)
    index = 0;
    while((sisx_vrate[i].idx != 0) && (sisx_vrate[i].xres <= xres)) {
       if((sisx_vrate[i].xres == xres) && (sisx_vrate[i].yres == yres)) {
-	 if((checksis730 == FALSE) || (sisx_vrate[i].SiS730valid32bpp == TRUE)) {
-	    if(sisx_vrate[i].refresh == irefresh) {
-	       index = sisx_vrate[i].idx;
-	       break;
-	    } else if(sisx_vrate[i].refresh > irefresh) {
-	       if((sisx_vrate[i].refresh - irefresh) <= 3) {
-		  index = sisx_vrate[i].idx;
-	       } else if( ((checksis730 == FALSE) || (sisx_vrate[i - 1].SiS730valid32bpp == TRUE)) &&
-		          ((irefresh - sisx_vrate[i - 1].refresh) <=  2) &&
-			  (sisx_vrate[i].idx != 1) ) {
-		  index = sisx_vrate[i - 1].idx;
-	       }
-	       break;
-	    } else if((irefresh - sisx_vrate[i].refresh) <= 2) {
-	       index = sisx_vrate[i].idx;
-	       break;
+	 if(sisx_vrate[i].refresh == irefresh) {
+	    index = sisx_vrate[i].idx;
+	    break;
+	 } else if(sisx_vrate[i].refresh > irefresh) {
+	    if((sisx_vrate[i].refresh - irefresh) <= 3) {
+		index = sisx_vrate[i].idx;
+	    } else if( ((irefresh - sisx_vrate[i - 1].refresh) <=  2) &&
+			(sisx_vrate[i].idx != 1) ) {
+		index = sisx_vrate[i - 1].idx;
 	    }
+	    break;
+	 } else if((irefresh - sisx_vrate[i].refresh) <= 2) {
+	    index = sisx_vrate[i].idx;
+	    break;
 	 }
       }
       i++;

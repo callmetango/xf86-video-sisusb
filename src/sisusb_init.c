@@ -1097,17 +1097,17 @@ SiSUSB_CalcCRRegisters(SiS_Private *SiS_Pr, int depth)
    SiS_Pr->CCRT1CRTC[3]  =  (((SiS_Pr->CHBlankEnd >> 3) - 1) & 0x1F) | 0x80;	/* CR3 */
    SiS_Pr->CCRT1CRTC[4]  =  (SiS_Pr->CHSyncStart >> 3) + 3;			/* CR4 */
    SiS_Pr->CCRT1CRTC[5]  =  ((((SiS_Pr->CHBlankEnd >> 3) - 1) & 0x20) << 2) |	/* CR5 */
-       			    (((SiS_Pr->CHSyncEnd >> 3) + 3) & 0x1F);
+			    (((SiS_Pr->CHSyncEnd >> 3) + 3) & 0x1F);
 
    SiS_Pr->CCRT1CRTC[6]  =  (SiS_Pr->CVTotal - 2) & 0xFF;			/* CR6 */
    SiS_Pr->CCRT1CRTC[7]  =  (((SiS_Pr->CVTotal - 2) & 0x100) >> 8)		/* CR7 */
- 	 		  | (((SiS_Pr->CVDisplay - 1) & 0x100) >> 7)
-	 		  | ((SiS_Pr->CVSyncStart & 0x100) >> 6)
-	 	  	  | (((SiS_Pr->CVBlankStart - 1) & 0x100) >> 5)
+			  | (((SiS_Pr->CVDisplay - 1) & 0x100) >> 7)
+			  | ((SiS_Pr->CVSyncStart & 0x100) >> 6)
+			  | (((SiS_Pr->CVBlankStart - 1) & 0x100) >> 5)
 			  | 0x10
-	 		  | (((SiS_Pr->CVTotal - 2) & 0x200)   >> 4)
-	 		  | (((SiS_Pr->CVDisplay - 1) & 0x200) >> 3)
-	 		  | ((SiS_Pr->CVSyncStart & 0x200) >> 2);
+			  | (((SiS_Pr->CVTotal - 2) & 0x200)   >> 4)
+			  | (((SiS_Pr->CVDisplay - 1) & 0x200) >> 3)
+			  | ((SiS_Pr->CVSyncStart & 0x200) >> 2);
 
    SiS_Pr->CCRT1CRTC[16] = ((((SiS_Pr->CVBlankStart - 1) & 0x200) >> 4) >> 5); 	/* CR9 */
 
@@ -1345,7 +1345,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
 	/* inSISIDXREG(SISSR, 0x0b, sr_data); */
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[0];
-	/* inSISIDXREG(SISCR, 0x00, cr_data); */
 
       /* Horizontal total */
       HT = (cr_data & 0xff) |
@@ -1353,7 +1352,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       A = HT + 5;
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[1];
-	/* inSISIDXREG(SISCR, 0x01, cr_data); */
 
       /* Horizontal display enable end */
       HDE = (cr_data & 0xff) |
@@ -1361,7 +1359,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       E = HDE + 1;  /* 0x80 0x64 */
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[4];
-	/* inSISIDXREG(SISCR, 0x04, cr_data); */
 
       /* Horizontal retrace (=sync) start */
       HRS = (cr_data & 0xff) |
@@ -1369,20 +1366,16 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       F = HRS - E - 3;  /* 0x06 0x06 */
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[2];
-	/* inSISIDXREG(SISCR, 0x02, cr_data); */
 
       /* Horizontal blank start */
       HBS = (cr_data & 0xff) |
             ((unsigned short) (sr_data & 0x30) << 4);
 
       sr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[15];
-	/* inSISIDXREG(SISSR, 0x0c, sr_data); */
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[3];
-	/* inSISIDXREG(SISCR, 0x03, cr_data);  */
 
       cr_data2 = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[5];
-	/* inSISIDXREG(SISCR, 0x05, cr_data2); */
 
       /* Horizontal blank end */
       HBE = (cr_data & 0x1f) |
@@ -1431,13 +1424,10 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
 #endif
 
       sr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[13];
-	/* inSISIDXREG(SISSR, 0x0A, sr_data); */
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[6];
-        /* inSISIDXREG(SISCR, 0x06, cr_data); */
 
       cr_data2 = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[7];
-        /* inSISIDXREG(SISCR, 0x07, cr_data2);  */
 
       /* Vertical total */
       VT = (cr_data & 0xFF) |
@@ -1447,7 +1437,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       A = VT + 2;
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[10];
-	/* inSISIDXREG(SISCR, 0x12, cr_data);  */
 
       /* Vertical display enable end */
       VDE = (cr_data & 0xff) |
@@ -1457,7 +1446,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       E = VDE + 1;
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[8];
-	/* inSISIDXREG(SISCR, 0x10, cr_data); */
 
       /* Vertical retrace (=sync) start */
       VRS = (cr_data & 0xff) |
@@ -1467,10 +1455,8 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       F = VRS + 1 - E;
 
       cr_data =  pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[11];
-	/* inSISIDXREG(SISCR, 0x15, cr_data);  */
 
       cr_data3 = (pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[16] & 0x01) << 5;
-	/* inSISIDXREG(SISCR, 0x09, cr_data3);  */
 
       /* Vertical blank start */
       VBS = (cr_data & 0xff) |
@@ -1479,7 +1465,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
 	    ((unsigned short) (sr_data & 0x04) << 8);
 
       cr_data =  pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[12];
-	/* inSISIDXREG(SISCR, 0x16, cr_data); */
 
       /* Vertical blank end */
       VBE = (cr_data & 0xff) |
@@ -1488,7 +1473,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       B = (temp > 0) ? temp : (temp + 512);
 
       cr_data = pSiSUSB->SiS_Pr->SiS_CRT1Table[index].CR[9];
-	/* inSISIDXREG(SISCR, 0x11, cr_data); */
 
       /* Vertical retrace (=sync) end */
       VRE = (cr_data & 0x0f) | ((sr_data & 0x20) >> 1);
