@@ -476,7 +476,7 @@ SiSUSB_SiSFB_Lock(ScrnInfoPtr pScrn, Bool lock)
 
     if((fd = open(pSiSUSB->sisfbdevname, 'r')) != -1) {
        parm = lock ? 1 : 0;
-       ioctl(fd, SISFB_SET_LOCK, &parm);
+       ioctl(fd, SISUSBFB_SET_LOCK, &parm);
        close(fd);
     }
 }
@@ -828,9 +828,9 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
     {
 
-       int        fd, i;
+       sisusbfb_info *mysisfbinfo = NULL;
        CARD32     sisfbinfosize = 0, sisfbversion;
-       sisfb_info *mysisfbinfo = NULL;
+       int        fd, i;
        char       name[16];
 
        i=0;
@@ -846,9 +846,9 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
 	     Bool gotit = FALSE;
 
-	     if(!ioctl(fd, SISFB_GET_INFO_SIZE, &sisfbinfosize)) {
+	     if(!ioctl(fd, SISUSBFB_GET_INFO_SIZE, &sisfbinfosize)) {
 		if((mysisfbinfo = xalloc(sisfbinfosize))) {
-		   if(!ioctl(fd, (SISFB_GET_INFO | (sisfbinfosize << 16)), mysisfbinfo)) {
+		   if(!ioctl(fd, (SISUSBFB_GET_INFO | (sisfbinfosize << 16)), mysisfbinfo)) {
 		      gotit = TRUE;
 		   } else {
 		      xfree(mysisfbinfo);
@@ -859,23 +859,23 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
 	     if(gotit) {
 
-	        if(mysisfbinfo->sisfb_id == SISUSBFB_ID) {
+	        if(mysisfbinfo->sisusbfb_id == SISUSBFB_ID) {
 
-		   sisfbversion = (mysisfbinfo->sisfb_version << 16) |
-		                  (mysisfbinfo->sisfb_revision << 8) |
-			          (mysisfbinfo->sisfb_patchlevel);
+		   sisfbversion = (mysisfbinfo->sisusbfb_version << 16) |
+		                  (mysisfbinfo->sisusbfb_revision << 8) |
+			          (mysisfbinfo->sisusbfb_patchlevel);
 
 
-		   if(mysisfbinfo->sisfb_minor  == pSiSUSB->sisusb_minor) {
+		   if(mysisfbinfo->sisusbfb_minor  == pSiSUSB->sisusb_minor) {
 
 		      pSiSUSB->sisfbfound = TRUE;
 
 		      xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
 				"%s: SiSUSB kernel fb driver (sisusbfb) %d.%d.%d detected\n",
 				&name[5],
-				mysisfbinfo->sisfb_version,
-				mysisfbinfo->sisfb_revision,
-				mysisfbinfo->sisfb_patchlevel);
+				mysisfbinfo->sisusbfb_version,
+				mysisfbinfo->sisusbfb_revision,
+				mysisfbinfo->sisusbfb_patchlevel);
 
 		      xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
 				"sisusbfb: using video mode 0x%02x\n", mysisfbinfo->fbvidmode);
@@ -1041,10 +1041,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     /* Unlock registers */
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, &srlockReg, &crlockReg);
 
-    /* Read BIOS for 300 and 315/330/340 series customization */
-    pSiSUSB->sishw_ext.pjVirtualRomBase = NULL;
-    pSiSUSB->sishw_ext.UseROM = FALSE;
-
     /* Evaluate options */
     SiSUSBOptions(pScrn);
 
@@ -1063,8 +1059,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
     /* Get MMIO address */
     pSiSUSB->IOAddress = pSiSUSB->sisusbmmiobase;
-
-    pSiSUSB->sishw_ext.bIntegratedMMEnabled = TRUE;
 
     pSiSUSB->RealVideoRam = pScrn->videoRam;
 

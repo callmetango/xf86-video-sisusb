@@ -88,7 +88,7 @@
 #define SupportCHTV 		0x0800
 #define Support64048060Hz       0x0800  /* Special for 640x480 LCD */
 #define SupportHiVision         0x0010
-#define SupportYPbPr750p        0x1000  
+#define SupportYPbPr750p        0x1000
 #define SupportLCD              0x0020
 #define SupportRAMDAC2          0x0040	/* All           (<= 100Mhz) */
 #define SupportRAMDAC2_135      0x0100  /* All except DH (<= 135Mhz) */
@@ -233,7 +233,7 @@ static const SiS_ModeResInfoStruct SiS_ModeResInfo[] =
 	{  768, 576, 8,16},   /* 0x1b */
 	{ 1360,1024, 8,16},   /* 0x1c */
 	{ 1680,1050, 8,16},   /* 0x1d */
-	{ 1280, 800, 8,16},   /* 0x1e */ 
+	{ 1280, 800, 8,16},   /* 0x1e */
 	{ 1920,1080, 8,16},   /* 0x1f */
 	{  960, 540, 8,16},   /* 0x20 */
 	{  960, 600, 8,16}    /* 0x21 */
@@ -593,7 +593,7 @@ static const SiS_CRT1TableStruct SiSUSB_CRT1Table[]=
    0x01}}, /* 0x3a */
  {{0xdc,0x9f,0x9f,0x80,0xaf,0x9d,0xe6,0xff,	/* 1280x960-60 - corrected */
    0xc0,0x83,0xbf,0xbf,0xe7,0x10,0x00,0x07,
-   0x01}}, /* 0x3b */ 
+   0x01}}, /* 0x3b */
  {{0x6b,0x59,0x59,0x8f,0x5e,0x8c,0x0b,0x3e,
    0xe9,0x8b,0xdf,0xe7,0x04,0x00,0x00,0x05,
    0x00}}, /* 0x3c */
@@ -693,7 +693,7 @@ static SiS_VCLKDataStruct SiSUSB_VCLKData[]=
 	{ 0x53,0xe2, 50}, /* 0x08 */
 	{ 0x74,0x67, 52}, /* 0x09 */
 	{ 0x6d,0x66, 56}, /* 0x0a */
-	{ 0x5a,0x64, 65}, /* 0x0b */  
+	{ 0x5a,0x64, 65}, /* 0x0b */
 	{ 0x46,0x44, 67}, /* 0x0c */
 	{ 0xb1,0x46, 68}, /* 0x0d */
 	{ 0xd3,0x4a, 72}, /* 0x0e */
@@ -799,41 +799,26 @@ static SiS_VCLKDataStruct SiSUSB_VCLKData[]=
 	{ 0xa8,0x42,131}  /* 0x72 1600x1200@60 for LCDA */
 };
 
-
 static const UCHAR SiS_SoftSetting  = 0x30;   /* RAM setting */
 
 void	SiSUSBRegInit(SiS_Private *SiS_Pr, SISIOADDRESS BaseAddr);
 
-#ifdef LINUX_XF86
 USHORT  SiSUSB_GetModeID(int VGAEngine, ULONG VBFlags, int HDisplay, int VDisplay,
-			  int Depth, BOOLEAN FSTN, int LCDwith, int LCDheight);
-BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,ScrnInfoPtr pScrn,USHORT ModeNo, BOOLEAN dosetpitch);
+			int Depth, BOOLEAN FSTN, int LCDwith, int LCDheight);
+BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,ScrnInfoPtr pScrn,
+			USHORT ModeNo, BOOLEAN dosetpitch);
 BOOLEAN	SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo, ScrnInfoPtr pScrn,
-               DisplayModePtr mode, BOOLEAN IsCustom);
+			DisplayModePtr mode, BOOLEAN IsCustom);
 USHORT 	SiSUSB_CheckBuildCustomMode(ScrnInfoPtr pScrn, DisplayModePtr mode, int VBFlags);
-DisplayModePtr SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN isfordvi, BOOLEAN f2);
+DisplayModePtr SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes,
+			BOOLEAN isfordvi, BOOLEAN f2);
 void    SiSUSB_MakeClockRegs(ScrnInfoPtr pScrn, int clock, UCHAR *p2b, UCHAR *p2c);
 UShort  SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, ULong VBFlags);
-#else
-BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,USHORT ModeNo);
-#endif
 
-#ifdef LINUX_KERNEL
-int    	sisusbfb_mode_rate_to_dclock(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-			      UCHAR modeno, UCHAR rateindex);
-int    	sisusbfb_mode_rate_to_ddata(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-			UCHAR modeno, UCHAR rateindex,
-			struct fb_var_screeninfo *var);
-BOOLEAN sisusbfb_gettotalfrommode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-		       	UCHAR modeno, int *htotal, int *vtotal, UCHAR rateindex);
-#endif
-
-#ifdef LINUX_XF86
 /* From other sis driver modules: */
 extern int      SiSUSB_compute_vclk(int Clock, int *out_n, int *out_dn, int *out_div,
 	     	 	 	int *out_sbit, int *out_scale);
 extern void 	SiSUSBCalcClock(ScrnInfoPtr pScrn, int clock, int max_VLD, unsigned int *vclk);
-#endif
 
 #endif
 

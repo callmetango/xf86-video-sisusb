@@ -52,10 +52,7 @@
  */
 
 #ifndef _SISUSB_OSDEF_H_
-#define _SISUSB_OSDEF_H_ 
- 
-/* The choices are: */
-#define LINUX_XF86    		/* XFree86/X.org */
+#define _SISUSB_OSDEF_H_
 
 #ifdef OutPortByte
 #undef OutPortByte
@@ -81,12 +78,6 @@
 #undef InPortLong
 #endif
 
-/**********************************************************************/
-/*  XFree86/X.org                                                     */
-/**********************************************************************/
-
-#ifdef LINUX_XF86
-
 #define SIS315H
 
 #define OutPortByte(p,v) outSISREG((IOADDRESS)(p),(CARD8)(v))
@@ -95,7 +86,5 @@
 #define InPortByte(p)    inSISREG((IOADDRESS)(p))
 #define InPortWord(p)    inSISREGW((IOADDRESS)(p))
 #define InPortLong(p)    inSISREGL((IOADDRESS)(p))
-
-#endif /* XF86 */
 
 #endif  /* _SISUSB_OSDEF_H_ */

@@ -53,11 +53,6 @@
 #ifndef _VGATYPES_
 #define _VGATYPES_
 
-#ifdef LINUX_KERNEL  /* We don't want the X driver to depend on kernel source */
-#include <linux/ioctl.h>
-#include <linux/version.h>
-#endif
-
 #ifndef FALSE
 #define FALSE   0
 #endif
@@ -100,22 +95,11 @@ typedef unsigned char BOOLEAN;
 
 #define SISIOMEMTYPE
 
-#ifdef LINUX_KERNEL
-typedef unsigned long SISIOADDRESS;
-#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,8)
-#include <linux/types.h>  /* Need __iomem */
-#undef SISIOMEMTYPE
-#define SISIOMEMTYPE __iomem
-#endif
-#endif
-
-#ifdef LINUX_XF86
 #if XF86_VERSION_CURRENT < XF86_VERSION_NUMERIC(4,2,0,0,0)
 typedef unsigned long IOADDRESS;
 typedef unsigned long SISIOADDRESS;
 #else
 typedef IOADDRESS SISIOADDRESS;
-#endif
 #endif
 
 enum _SIS_CHIP_TYPE {
@@ -147,67 +131,42 @@ typedef struct _SIS_HW_INFO  SIS_HW_INFO, *PSIS_HW_INFO;
 
 struct _SIS_HW_INFO
 {
-#ifdef LINUX_XF86
-    PCITAG PciTag;		 /* PCI Tag */
-#endif
-
-    UCHAR *pjVirtualRomBase;	 /* ROM image */
-
-    BOOLEAN UseROM;		 /* Use the ROM image if provided */
-
-#ifdef LINUX_KERNEL
-    UCHAR SISIOMEMTYPE *pjVideoMemoryAddress;
-    				 /* base virtual memory address */
-                                 /* of Linear VGA memory */
-
-    ULONG  ulVideoMemorySize;    /* size, in bytes, of the memory on the board */
-#endif
-
-    SISIOADDRESS ulIOAddress;    /* base I/O address of VGA ports (0x3B0; relocated) */
-
-    UCHAR  jChipType;            /* Used to Identify SiS Graphics Chip */
-                                 /* defined in the enum "SIS_CHIP_TYPE" (above or sisfb.h) */
-
-    UCHAR  jChipRevision;        /* Used to Identify SiS Graphics Chip Revision */
-
-    BOOLEAN bIntegratedMMEnabled;/* supporting integration MM enable */
+    SISIOADDRESS ulIOAddress;	/* base I/O address of VGA ports (0x3B0; relocated) */
+    UCHAR  jChipType;		/* defined in the enum "SIS_CHIP_TYPE" above */
+    UCHAR  jChipRevision;
 };
 #endif
 
 /* Addtional IOCTLs for communication sisfb <> X driver        */
 /* If changing this, sisfb.h must also be changed (for sisfb) */
 
-#ifdef LINUX_XF86  /* We don't want the X driver to depend on the kernel source */
-
 /* ioctl for identifying and giving some info (esp. memory heap start) */
-#define SISFB_GET_INFO_SIZE	0x8004f33c
-#define SISFB_GET_INFO		0x8000f33b  /* Must be patched with result from ..._SIZE at D[29:16] */
+#define SISUSBFB_GET_INFO_SIZE	0x8004f33c
+#define SISUSBFB_GET_INFO	0x8000f33b  /* Must be patched with result from ..._SIZE at D[29:16] */
 
 /* lock sisfb from register access */
-#define SISFB_SET_LOCK		0x4004f33a
+#define SISUSBFB_SET_LOCK	0x4004f33a
 
-/* Structure argument for SISFB_GET_INFO ioctl  */
-typedef struct _SISFB_INFO sisfb_info, *psisfb_info;
+/* Structure argument for SISUSBFB_GET_INFO ioctl  */
+typedef struct _SISUSBFB_INFO sisusbfb_info, *psisusbfb_info;
 
-struct _SISFB_INFO {
-	CARD32 	sisfb_id;         	/* for identifying sisusbfb */
-#ifndef SISUSBFB_ID
+struct _SISUSBFB_INFO {
+	CARD32 	sisusbfb_id;         	/* for identifying sisusbfb */
 #define SISUSBFB_ID	  0x53495546    /* Identify myself with 'SIUF' */
-#endif
 	CARD32	chip_id;		/* PCI ID of detected chip */
 	CARD32	memory;			/* video memory in KB which sisusbfb manages */
-	CARD32	heapstart;             	/* heap start (= sisfb "mem" argument) in KB */
+	CARD32	heapstart;		/* heap start in KB */
 	CARD8	fbvidmode;		/* current sisfb mode */
 
-	CARD8	sisfb_version;
-	CARD8	sisfb_revision;
-	CARD8	sisfb_patchlevel;
+	CARD8	sisusbfb_version;
+	CARD8	sisusbfb_revision;
+	CARD8	sisusbfb_patchlevel;
 
-	CARD8	sisfb_caps;		/* sisfb's capabilities */
+	CARD8	sisusbfb_caps;		/* sisfb's capabilities */
 
-	CARD32	sisfb_tqlen;		/* turbo queue length (in KB) */
+	CARD32	sisusbfb_tqlen;		/* turbo/cmd queue length (in KB) */
 
-	CARD32	sisfb_minor;    	/* minor device number of USB device */
+	CARD32	sisusbfb_minor;    	/* minor device number of USB device */
 
 	CARD32	reserved[32]; 		/* for future use */
 };
@@ -217,9 +176,7 @@ typedef struct _SISUSB_INFO sisusb_info, *psisusb_info;
 
 struct _SISUSB_INFO {
 	CARD32   sisusb_id;         	/* for identifying sisusb */
-#ifndef SISUSB_ID
 #define SISUSB_ID  0x53495355    	/* Identify myself with 'SISU' */
-#endif
 	CARD8   sisusb_version;
 	CARD8   sisusb_revision;
 	CARD8 	sisusb_patchlevel;
@@ -266,8 +223,6 @@ struct _SISUSB_COMMAND {
 #define SISUSB_GET_CONFIG  	0x8000f33f	/* _IOR(0xF3,0x3F,__u32) */
 		/* Must be patched with result from ..._SIZE at D[29:16] */
 #define SISUSB_COMMAND 		0xc00cf33d	/* _IORW(0xF3,0x3D,struct _SISUSB_COMMAND) */
-
-#endif /* LINUX_XF86 */
 
 #endif
 

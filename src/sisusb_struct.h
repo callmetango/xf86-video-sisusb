@@ -116,10 +116,7 @@ typedef struct _SiS_ModeResInfoStruct
 
 typedef struct _SiS_Private
 {
-#ifdef LINUX_KERNEL
-        SISIOADDRESS RelIO;
-#endif
-        void *pSiSUSB; 
+	void *pSiSUSB;
 	SISIOADDRESS SiS_P3c4;
 	SISIOADDRESS SiS_P3d4;
 	SISIOADDRESS SiS_P3c0;
@@ -134,7 +131,7 @@ typedef struct _SiS_Private
 	SISIOADDRESS SiS_P3cd;
 	SISIOADDRESS SiS_P3da;
 	SISIOADDRESS SiS_Part1Port;
-	
+
 	UCHAR  SiS_MyCR63;
 	USHORT SiS_CRT1Mode;
 	int    SiS_RAMType;
@@ -142,7 +139,7 @@ typedef struct _SiS_Private
 	UCHAR  SiS_DataBusWidth;
 	USHORT SiS_ModeType;
 	USHORT SiS_SetFlag;
-	
+
 	const SiS_StandTableStruct  *SiS_StandTable;
 	const SiS_ExtStruct         *SiS_EModeIDTable;
 	const SiS_Ext2Struct        *SiS_RefIndex;
@@ -165,7 +162,7 @@ typedef struct _SiS_Private
 	USHORT  CVBlankStart;
 	USHORT  CVBlankEnd;
 	ULONG   CDClock;
-	ULONG   CFlags;   
+	ULONG   CFlags;
 	UCHAR   CCRT1CRTC[17];
 	UCHAR   CSR2B;
 	UCHAR   CSR2C;
