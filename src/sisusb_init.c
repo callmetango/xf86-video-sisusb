@@ -107,6 +107,9 @@ SiSUSB_GetModeID(int VGAEngine, ULONG VBFlags, int HDisplay, int VDisplay,
           if(VDisplay == 576)      ModeIndex = ModeIndex_1024x576[Depth];
           else if(VDisplay == 768) ModeIndex = ModeIndex_1024x768[Depth];
           break;
+     case 1152:
+	  if(VDisplay == 864)      ModeIndex = ModeIndex_1152x864[Depth];
+	  break;
      case 1280:
           switch(VDisplay) {
 	  case 720:
@@ -114,6 +117,9 @@ SiSUSB_GetModeID(int VGAEngine, ULONG VBFlags, int HDisplay, int VDisplay,
 	     break;
 	  case 768:
 	     ModeIndex = ModeIndex_1280x768[Depth];
+	     break;
+	  case 1024:
+	     ModeIndex = ModeIndex_1280x1024[Depth];
 	     break;
 	  }
    }
