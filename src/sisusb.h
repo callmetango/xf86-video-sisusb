@@ -543,7 +543,7 @@ typedef struct {
     UChar		*ShadowPtrSwap;
 #endif
     int			ShadowPitch;
-    int			ShXmin, ShXmax, ShYmin, ShYmax, ShBoxcount;
+    int			ShXmin, ShXmax, ShYmin, ShYmax, ShBoxcount, delaycount;
 
     /* sisusb and sisusbfb communication */
     CARD32		USBBus, USBDev;

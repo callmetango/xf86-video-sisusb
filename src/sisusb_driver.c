@@ -1916,6 +1916,7 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 #endif
 
     pSiSUSB->ShBoxcount = 0;
+    pSiSUSB->delaycount = 0;
     if(pSiSUSB->ShadowFB) {
        ShadowFBInit(pScreen, SISUSBRefreshArea);
 #if 0

@@ -125,6 +125,9 @@ SISUSBDoRefreshArea(ScrnInfoPtr pScrn)
     int	      ymin = pSiSUSB->ShYmin;
     int	      ymax = pSiSUSB->ShYmax;
 
+    if(pSiSUSB->delaycount++ < 3) return;
+    pSiSUSB->delaycount = 0;
+
     if(!pSiSUSB->ShBoxcount) return;
 
     Bpp = pScrn->bitsPerPixel >> 3;
