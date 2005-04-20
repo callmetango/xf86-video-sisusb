@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_driver.c,v 1.4 2005/01/28 17:31:33 twini Exp $ */
 /*
  * SiSUSB driver main code
  *
@@ -42,7 +42,7 @@
 #include "mipointer.h"
 #include "mibstore.h"
 #define _XF86MISC_SERVER_
-#include "xf86misc.h"
+#include <X11/extensions/xf86misc.h>
 
 #include "sisusb_regs.h"
 #include "sisusb_dac.h"
@@ -52,7 +52,7 @@
 #include "globals.h"
 
 #define DPMS_SERVER
-#include "extensions/dpms.h"
+#include <X11/extensions/dpms.h>
 
 /*
  * This is intentionally screen-independent.  It indicates the binding
