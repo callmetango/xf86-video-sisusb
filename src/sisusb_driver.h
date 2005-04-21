@@ -86,12 +86,12 @@ static Bool	SISUSBDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer p);
 
 /* Optional functions */
 #ifdef X_XF86MiscPassMessage
-static int	SISUSBHandleMessage(int scrnIndex, const char *msgtype,
+extern int	SISUSBHandleMessage(int scrnIndex, const char *msgtype,
 				const char *msgval, char **retmsg);
 #endif
 static void       SISUSBFreeScreen(int scrnIndex, int flags);
 static ModeStatus SISUSBValidMode(int scrnIndex, DisplayModePtr mode,
-                               Bool verbose, int flags);
+				Bool verbose, int flags);
 
 /* Internally used functions */
 static Bool	SISUSBMapMem(ScrnInfoPtr pScrn);
@@ -137,7 +137,10 @@ extern void	SISUSBDoRefreshArea(ScrnInfoPtr pScrn);
 
 /* vb */
 extern void	SISUSBCRT1PreInit(ScrnInfoPtr pScrn);
-extern Bool	SISUSBRedetectCRT2Type(ScrnInfoPtr pScrn);
+
+/* utility */
+extern void	SiSUSBCtrlExtInit(ScrnInfoPtr pScrn);
+extern void	SiSUSBCtrlExtUnregister(SISUSBPtr pSiSUSB, int index);
 
 /* init.c ----- (use its data types!) */
 extern USHORT   SiSUSB_GetModeID(int VGAEngine, ULONG VBFlags, int HDisplay, int VDisplay,

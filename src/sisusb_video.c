@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_video.c,v 1.2 2005/01/28 17:31:33 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Xv driver for SiS 315 USB
  *
@@ -42,427 +42,7 @@
 
 #include "sisusb_regs.h"
 
-static 		XF86VideoAdaptorPtr SISUSBSetupImageVideo(ScreenPtr);
-static int 	SISUSBSetPortAttribute(ScrnInfoPtr, Atom, INT32, pointer);
-static int 	SISUSBGetPortAttribute(ScrnInfoPtr, Atom ,INT32 *, pointer);
-static void 	SISUSBQueryBestSize(ScrnInfoPtr, Bool, short, short, short,
-			short, unsigned int *,unsigned int *, pointer);
-static int 	SISUSBQueryImageAttributes(ScrnInfoPtr,
-    			int, UShort *, UShort *, int *, int *);
-static void 	SISUSBStopVideo(ScrnInfoPtr, pointer, Bool);
-#ifdef SIS_ENABLEXV
-static int 	SISUSBPutImage( ScrnInfoPtr,
-    			short, short, short, short, short, short, short, short,
-    			int, UChar *, short, short, Bool, RegionPtr, pointer);
-static void 	SISUSBVideoTimerCallback(ScrnInfoPtr pScrn, Time now);
-static void     SISUSBInitOffscreenImages(ScreenPtr pScrn);
-FBLinearPtr     SISUSBAllocateOverlayMemory(ScrnInfoPtr pScrn, FBLinearPtr linear, int size);
-#endif
-
-#define OFF_DELAY   	200    /* milliseconds */
-#define FREE_DELAY  	30000
-
-#define OFF_TIMER   	0x01
-#define FREE_TIMER  	0x02
-#define CLIENT_VIDEO_ON 0x04
-
-#define TIMER_MASK      (OFF_TIMER | FREE_TIMER)
-
-#define WATCHDOG_DELAY  200000 /* Watchdog counter for Vertical Restrace waiting */
-
-#define MAKE_ATOM(a) MakeAtom(a, sizeof(a) - 1, TRUE)
-
-#define IMAGE_MIN_WIDTH         32  	/* Minimum and maximum source image sizes */
-#define IMAGE_MIN_HEIGHT        24
-#define IMAGE_MAX_WIDTH_315   1920
-#define IMAGE_MAX_HEIGHT_315  1080
-#define IMAGE_MAX_WIDTH_340   1920	/* ? */
-
-#define OVERLAY_MIN_WIDTH       32  	/* Minimum overlay sizes */
-#define OVERLAY_MIN_HEIGHT      24
-
-#define DISPMODE_SINGLE1 0x1  		/* CRT1 only */
-#define DISPMODE_SINGLE2 0x2  		/* CRT2 only */
-#define DISPMODE_MIRROR  0x4  		/* CRT1 + CRT2 MIRROR (see note below) */
-
-#define LINEBUFLIMIT1    384		/* Limits at which line buffers must be merged */
-#define LINEBUFLIMIT2    720
-#define LINEBUFLIMIT3    576
-#define LINEBUFLIMIT4   1280		/* 340 */
-
-#define NUM_FORMATS 3
-
-static XF86VideoFormatRec SISUSBFormats[NUM_FORMATS] =
-{
-   { 8, PseudoColor},
-   {16, TrueColor},
-   {24, TrueColor}
-};
-
-static char sisxvcolorkey[] 				= "XV_COLORKEY";
-static char sisxvbrightness[] 				= "XV_BRIGHTNESS";
-static char sisxvcontrast[] 				= "XV_CONTRAST";
-static char sisxvsaturation[] 				= "XV_SATURATION";
-static char sisxvhue[] 					= "XV_HUE";
-static char sisxvautopaintcolorkey[] 			= "XV_AUTOPAINT_COLORKEY";
-static char sisxvsetdefaults[] 				= "XV_SET_DEFAULTS";
-static char sisxvswitchcrt[] 				= "XV_SWITCHCRT";
-static char sisxvtvxposition[] 				= "XV_TVXPOSITION";
-static char sisxvtvyposition[] 				= "XV_TVYPOSITION";
-static char sisxvgammared[] 				= "XV_GAMMA_RED";
-static char sisxvgammagreen[] 				= "XV_GAMMA_GREEN";
-static char sisxvgammablue[] 				= "XV_GAMMA_BLUE";
-static char sisxvdisablegfx[] 				= "XV_DISABLE_GRAPHICS";
-static char sisxvdisablegfxlr[] 			= "XV_DISABLE_GRAPHICS_LR";
-static char sisxvdisablecolorkey[] 			= "XV_DISABLE_COLORKEY";
-static char sisxvusechromakey[] 			= "XV_USE_CHROMAKEY";
-static char sisxvinsidechromakey[] 			= "XV_INSIDE_CHROMAKEY";
-static char sisxvyuvchromakey[] 			= "XV_YUV_CHROMAKEY";
-static char sisxvchromamin[] 				= "XV_CHROMAMIN";
-static char sisxvchromamax[] 				= "XV_CHROMAMAX";
-static char sisxvqueryvbflags[] 			= "XV_QUERYVBFLAGS";
-static char sisxvsdgetdriverversion[] 			= "XV_SD_GETDRIVERVERSION";
-static char sisxvsdgethardwareinfo[]			= "XV_SD_GETHARDWAREINFO";
-static char sisxvsdgetbusid[] 				= "XV_SD_GETBUSID";
-static char sisxvsdqueryvbflagsversion[] 		= "XV_SD_QUERYVBFLAGSVERSION";
-static char sisxvsdgetsdflags[] 			= "XV_SD_GETSDFLAGS";
-static char sisxvsdgetsdflags2[] 			= "XV_SD_GETSDFLAGS2";
-static char sisxvsdunlocksisdirect[] 			= "XV_SD_UNLOCKSISDIRECT";
-static char sisxvsdsetvbflags[] 			= "XV_SD_SETVBFLAGS";
-static char sisxvsdquerydetecteddevices[] 		= "XV_SD_QUERYDETECTEDDEVICES";
-static char sisxvsdcrt1status[] 			= "XV_SD_CRT1STATUS";
-static char sisxvsdcheckmodeindexforcrt2[] 		= "XV_SD_CHECKMODEINDEXFORCRT2";
-static char sisxvsdresultcheckmodeindexforcrt2[] 	= "XV_SD_RESULTCHECKMODEINDEXFORCRT2";
-static char sisxvsdredetectcrt2[]			= "XV_SD_REDETECTCRT2DEVICES";
-static char sisxvsdsisantiflicker[] 			= "XV_SD_SISANTIFLICKER";
-static char sisxvsdsissaturation[] 			= "XV_SD_SISSATURATION";
-static char sisxvsdsisedgeenhance[] 			= "XV_SD_SISEDGEENHANCE";
-static char sisxvsdsiscolcalibf[] 			= "XV_SD_SISCOLCALIBF";
-static char sisxvsdsiscolcalibc[] 			= "XV_SD_SISCOLCALIBC";
-static char sisxvsdsiscfilter[] 			= "XV_SD_SISCFILTER";
-static char sisxvsdsisyfilter[] 			= "XV_SD_SISYFILTER";
-static char sisxvsdchcontrast[] 			= "XV_SD_CHCONTRAST";
-static char sisxvsdchtextenhance[] 			= "XV_SD_CHTEXTENHANCE";
-static char sisxvsdchchromaflickerfilter[] 		= "XV_SD_CHCHROMAFLICKERFILTER";
-static char sisxvsdchlumaflickerfilter[] 		= "XV_SD_CHLUMAFLICKERFILTER";
-static char sisxvsdchcvbscolor[] 			= "XV_SD_CHCVBSCOLOR";
-static char sisxvsdchoverscan[]				= "XV_SD_CHOVERSCAN";
-static char sisxvsdenablegamma[]			= "XV_SD_ENABLEGAMMA";
-static char sisxvsdtvxscale[] 				= "XV_SD_TVXSCALE";
-static char sisxvsdtvyscale[] 				= "XV_SD_TVYSCALE";
-static char sisxvsdgetscreensize[] 			= "XV_SD_GETSCREENSIZE";
-static char sisxvsdstorebrir[] 				= "XV_SD_STOREDGAMMABRIR";
-static char sisxvsdstorebrig[] 				= "XV_SD_STOREDGAMMABRIG";
-static char sisxvsdstorebrib[] 				= "XV_SD_STOREDGAMMABRIB";
-static char sisxvsdstorepbrir[] 			= "XV_SD_STOREDGAMMAPBRIR";
-static char sisxvsdstorepbrig[] 			= "XV_SD_STOREDGAMMAPBRIG";
-static char sisxvsdstorepbrib[] 			= "XV_SD_STOREDGAMMAPBRIB";
-static char sisxvsdstorebrir2[]				= "XV_SD_STOREDGAMMABRIR2";
-static char sisxvsdstorebrig2[]				= "XV_SD_STOREDGAMMABRIG2";
-static char sisxvsdstorebrib2[]				= "XV_SD_STOREDGAMMABRIB2";
-static char sisxvsdstorepbrir2[] 			= "XV_SD_STOREDGAMMAPBRIR2";
-static char sisxvsdstorepbrig2[] 			= "XV_SD_STOREDGAMMAPBRIG2";
-static char sisxvsdstorepbrib2[] 			= "XV_SD_STOREDGAMMAPBRIB2";
-static char sisxvsdstoregarc2[]				= "XV_SD_GAMMACRT2R";
-static char sisxvsdstoregagc2[]				= "XV_SD_GAMMACRT2G";
-static char sisxvsdstoregabc2[]				= "XV_SD_GAMMACRT2B";
-static char sisxvsdstorebrirc2[]			= "XV_SD_STOREDGAMMABRIRC2";
-static char sisxvsdstorebrigc2[]			= "XV_SD_STOREDGAMMABRIGC2";
-static char sisxvsdstorebribc2[]			= "XV_SD_STOREDGAMMABRIBC2";
-static char sisxvsdstorepbrirc2[] 			= "XV_SD_STOREDGAMMAPBRIRC2";
-static char sisxvsdstorepbrigc2[] 			= "XV_SD_STOREDGAMMAPBRIGC2";
-static char sisxvsdstorepbribc2[] 			= "XV_SD_STOREDGAMMAPBRIBC2";
-static char sisxvsdhidehwcursor[] 			= "XV_SD_HIDEHWCURSOR";
-static char sisxvsdpanelmode[] 				= "XV_SD_PANELMODE";
-#ifdef TWDEBUG
-static char sisxvsetreg[]				= "XV_SD_SETREG";
-#endif
-
-/***********************************************/
-/*               OVERLAY ADAPTOR               */
-/***********************************************/
-
-#define GET_PORT_PRIVATE(pScrn) \
-   (SISUSBPortPrivPtr)((SISUSBPTR(pScrn))->adaptor->pPortPrivates[0].ptr)
-
-/* client libraries expect an encoding */
-static XF86VideoEncodingRec DummyEncoding =
-{
-   0,
-   "XV_IMAGE",
-   0, 0,		/* Will be filled in */
-   {1, 1}
-};
-
-#ifdef TWDEBUG
-#define NUM_ATTRIBUTES_315 75
-#else
-#define NUM_ATTRIBUTES_315 74
-#endif
-
-static XF86AttributeRec SISUSBAttributes_315[NUM_ATTRIBUTES_315] =
-{
-   {XvSettable | XvGettable, 0, (1 << 24) - 1, sisxvcolorkey},
-   {XvSettable | XvGettable, -128, 127,        sisxvbrightness},
-   {XvSettable | XvGettable, 0, 7,             sisxvcontrast},
-   {XvSettable | XvGettable, -7, 7,            sisxvsaturation},
-   {XvSettable | XvGettable, -8, 7,            sisxvhue},
-   {XvSettable | XvGettable, 0, 1,             sisxvautopaintcolorkey},
-   {XvSettable             , 0, 0,             sisxvsetdefaults},
-   {XvSettable | XvGettable, -32, 32,          sisxvtvxposition},
-   {XvSettable | XvGettable, -32, 32,          sisxvtvyposition},
-   {XvSettable | XvGettable, 100, 10000,       sisxvgammared},
-   {XvSettable | XvGettable, 100, 10000,       sisxvgammagreen},
-   {XvSettable | XvGettable, 100, 10000,       sisxvgammablue},
-   {XvSettable | XvGettable, 0, 1,             sisxvdisablegfx},
-   {XvSettable | XvGettable, 0, 1,             sisxvdisablegfxlr},
-   {XvSettable | XvGettable, 0, 1,             sisxvdisablecolorkey},
-   {XvSettable | XvGettable, 0, 1,             sisxvusechromakey},
-   {XvSettable | XvGettable, 0, 1,             sisxvinsidechromakey},
-   {XvSettable | XvGettable, 0, (1 << 24) - 1, sisxvchromamin},
-   {XvSettable | XvGettable, 0, (1 << 24) - 1, sisxvchromamax},
-   {             XvGettable, 0, -1,    	       sisxvqueryvbflags},
-   {             XvGettable, 0, -1,    	       sisxvsdgetdriverversion},
-   {             XvGettable, 0, -1,    	       sisxvsdgethardwareinfo},
-   {             XvGettable, 0, -1,    	       sisxvsdgetbusid},
-   {             XvGettable, 0, -1,    	       sisxvsdqueryvbflagsversion},
-   {             XvGettable, 0, -1,   	       sisxvsdgetsdflags},
-   {             XvGettable, 0, -1,   	       sisxvsdgetsdflags2},
-   {XvSettable | XvGettable, 0, -1,   	       sisxvsdunlocksisdirect},
-   {XvSettable             , 0, -1,   	       sisxvsdsetvbflags},
-   {             XvGettable, 0, -1,    	       sisxvsdquerydetecteddevices},
-   {XvSettable | XvGettable, 0, 1,    	       sisxvsdcrt1status},
-   {XvSettable             , 0, -1,    	       sisxvsdcheckmodeindexforcrt2},
-   {             XvGettable, 0, -1,   	       sisxvsdresultcheckmodeindexforcrt2},
-   {XvSettable             , 0, 0,             sisxvsdredetectcrt2},
-   {XvSettable | XvGettable, 0, 4,             sisxvsdsisantiflicker},
-   {XvSettable | XvGettable, 0, 15,            sisxvsdsissaturation},
-   {XvSettable | XvGettable, 0, 15,            sisxvsdsisedgeenhance},
-   {XvSettable | XvGettable, -128, 127,        sisxvsdsiscolcalibf},
-   {XvSettable | XvGettable, -120, 120,        sisxvsdsiscolcalibc},
-   {XvSettable | XvGettable, 0, 1,             sisxvsdsiscfilter},
-   {XvSettable | XvGettable, 0, 8,             sisxvsdsisyfilter},
-   {XvSettable | XvGettable, 0, 15,            sisxvsdchcontrast},
-   {XvSettable | XvGettable, 0, 15,            sisxvsdchtextenhance},
-   {XvSettable | XvGettable, 0, 15,            sisxvsdchchromaflickerfilter},
-   {XvSettable | XvGettable, 0, 15,            sisxvsdchlumaflickerfilter},
-   {XvSettable | XvGettable, 0, 1,             sisxvsdchcvbscolor},
-   {XvSettable | XvGettable, 0, 3,             sisxvsdchoverscan},
-   {XvSettable | XvGettable, 0, 7,             sisxvsdenablegamma},
-   {XvSettable | XvGettable, -16, 16,          sisxvsdtvxscale},
-   {XvSettable | XvGettable, -4, 3,            sisxvsdtvyscale},
-   {             XvGettable, 0, -1,   	       sisxvsdgetscreensize},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrir},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrig},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrib},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrir},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrig},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrib},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrir2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrig2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrib2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrir2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrig2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrib2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstoregarc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstoregagc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstoregabc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrirc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebrigc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorebribc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrirc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbrigc2},
-   {XvSettable | XvGettable, 100, 10000,       sisxvsdstorepbribc2},
-   {XvSettable | XvGettable, 0, 1,             sisxvsdhidehwcursor},
-   {XvSettable | XvGettable, 0, 15,            sisxvsdpanelmode},
-#ifdef TWDEBUG
-   {XvSettable             , 0, -1,   	       sisxvsetreg},
-#endif
-   {XvSettable | XvGettable, 0, 1,             sisxvswitchcrt},
-};
-
-#define NUM_IMAGES_315 7	    /* basically NV12 only - but does not work */
-
-#define PIXEL_FMT_YV12 FOURCC_YV12  /* 0x32315659 */
-#define PIXEL_FMT_UYVY FOURCC_UYVY  /* 0x59565955 */
-#define PIXEL_FMT_YUY2 FOURCC_YUY2  /* 0x32595559 */
-#define PIXEL_FMT_I420 FOURCC_I420  /* 0x30323449 */
-#define PIXEL_FMT_RGB5 0x35315652
-#define PIXEL_FMT_RGB6 0x36315652
-#define PIXEL_FMT_YVYU 0x55595659   /* 315/330+ only */
-#define PIXEL_FMT_NV12 0x3231564e   /* 330+ only */
-#define PIXEL_FMT_NV21 0x3132564e   /* 330+ only */
-
-/* TODO: */
-#define PIXEL_FMT_RAW8 0x38574152
-
-static XF86ImageRec SISUSBImages[NUM_IMAGES_315] =
-{
-    XVIMAGE_YUY2, /* If order is changed, SISOffscreenImages must be adapted */
-    XVIMAGE_YV12,
-    XVIMAGE_UYVY,
-    XVIMAGE_I420
-    ,
-    { /* RGB 555 */
-      PIXEL_FMT_RGB5,
-      XvRGB,
-      LSBFirst,
-      {'R','V','1','5',
-       0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
-      16,
-      XvPacked,
-      1,
-      15, 0x7C00, 0x03E0, 0x001F,
-      0, 0, 0,
-      0, 0, 0,
-      0, 0, 0,
-      {'R', 'V', 'B',0,
-       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-      XvTopToBottom
-    },
-    { /* RGB 565 */
-      PIXEL_FMT_RGB6,
-      XvRGB,
-      LSBFirst,
-      {'R','V','1','6',
-       0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
-      16,
-      XvPacked,
-      1,
-      16, 0xF800, 0x07E0, 0x001F,
-      0, 0, 0,
-      0, 0, 0,
-      0, 0, 0,
-      {'R', 'V', 'B',0,
-       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-      XvTopToBottom
-    },
-    {  /* YVYU */
-      PIXEL_FMT_YVYU, \
-      XvYUV, \
-      LSBFirst, \
-      {'Y','V','Y','U',
-	0x00,0x00,0x00,0x10,0x80,0x00,0x00,0xAA,0x00,0x38,0x9B,0x71},
-      16,
-      XvPacked,
-      1,
-      0, 0, 0, 0,
-      8, 8, 8,
-      1, 2, 2,
-      1, 1, 1,
-      {'Y','V','Y','U',
-       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
-      XvTopToBottom
-   }
-};
-
-typedef struct {
-    FBLinearPtr  linear;
-    CARD32       bufAddr[2];
-
-    UChar currentBuf;
-
-    short drw_x, drw_y, drw_w, drw_h;
-    short src_x, src_y, src_w, src_h;
-    int id;
-    short srcPitch, height;
-
-    char         brightness;
-    UChar        contrast;
-    char 	 hue;
-    short        saturation;
-
-    RegionRec    clip;
-    CARD32       colorKey;
-    Bool 	 autopaintColorKey;
-
-    Bool 	 disablegfx;
-    Bool	 disablegfxlr;
-
-    Bool         usechromakey;
-    Bool	 insidechromakey, yuvchromakey;
-    CARD32	 chromamin, chromamax;
-
-    CARD32       videoStatus;
-    Bool	 overlayStatus;
-    Time         offTime;
-    Time         freeTime;
-
-    CARD32       displayMode;
-    Bool	 bridgeIsSlave;
-
-    Bool         hasTwoOverlays;   /* Chipset has two overlays */
-    Bool         dualHeadMode;     /* We're running in DHM */
-
-    Bool  	 NoOverlay;
-    Bool	 PrevOverlay;
-
-    Bool	 AllowSwitchCRT;
-    int 	 crtnum;	   /* 0=CRT1, 1=CRT2 */
-
-    Bool         needToScale;      /* Need to scale video */
-
-    int          shiftValue;       /* 315/330 series need word addr/pitch, 300 series double word */
-
-    short  	 linebufMergeLimit;
-    CARD8        linebufmask;
-
-    short        oldx1, oldx2, oldy1, oldy2;
-    int          mustwait;
-
-    Bool         grabbedByV4L;	   /* V4L stuff */
-    int          pitch;
-    int          offset;
-
-    int 	 modeflags;	   /* Flags field of current display mode */
-
-    Bool	 is340;
-
-} SISUSBPortPrivRec, *SISUSBPortPrivPtr;
-
-typedef struct {
-    int pixelFormat;
-
-    CARD16  pitch;
-    CARD16  origPitch;
-
-    CARD8   keyOP;
-    CARD16  HUSF;
-    CARD16  VUSF;
-    CARD8   IntBit;
-    CARD8   wHPre;
-
-    CARD16  srcW;
-    CARD16  srcH;
-
-    BoxRec  dstBox;
-
-    CARD32  PSY;
-    CARD32  PSV;
-    CARD32  PSU;
-
-    CARD16  SCREENheight;
-
-    CARD16  lineBufSize;
-
-    DisplayModePtr  currentmode;
-
-    CARD8   bobEnable;
-
-    CARD8   planar;
-    CARD8   planar_shiftpitch;
-
-    CARD8   contrastCtrl;
-    CARD8   contrastFactor;
-
-    CARD16  oldLine, oldtop;
-
-    CARD8   (*VBlankActiveFunc)(SISUSBPtr, SISUSBPortPrivPtr);
-#if 0
-    CARD32  (*GetScanLineFunc)(SISUSBPtr pSiSUSB);
-#endif
-
-} SISUSBOverlayRec, *SISUSBOverlayPtr;
+#include "sisusb_video.h"
 
 /****************************************************************************
  * Raw register access : These routines directly interact with the sis's
@@ -531,6 +111,17 @@ static CARD16 get_scanline_CRT1(SISUSBPtr pSiSUSB)
 }
 #endif
 #endif /* SIS_ENABLEXV */
+
+/* Helper: Count attributes */
+static int
+SiSUSBCountAttributes(XF86AttributeRec *attrs)
+{
+   int num = 0;
+
+   while(attrs[num].name) num++;
+
+   return num;
+}
 
 #ifdef SIS_ENABLEXV
 static void
@@ -637,7 +228,7 @@ void SISUSBInitVideo(ScreenPtr pScreen)
     }
 }
 
-static void
+void
 SISUSBSetPortDefaults(ScrnInfoPtr pScrn, SISUSBPortPrivPtr pPriv)
 {
     SISUSBPtr    pSiSUSB = SISUSBPTR(pScrn);
@@ -805,7 +396,7 @@ SISUSBSetupImageVideo(ScreenPtr pScreen)
 
     adapt->nImages = NUM_IMAGES_315;
     adapt->pAttributes = SISUSBAttributes_315;
-    adapt->nAttributes = NUM_ATTRIBUTES_315;
+    adapt->nAttributes = SiSUSBCountAttributes(&SISUSBAttributes_315[0]);
     if(pPriv->hasTwoOverlays) adapt->nAttributes--;
 
     adapt->pImages = SISUSBImages;
@@ -862,7 +453,8 @@ SISUSBSetupImageVideo(ScreenPtr pScreen)
     pSiSUSB->xvYUVChromakey      = MAKE_ATOM(sisxvyuvchromakey);
     pSiSUSB->xvChromaMin	 = MAKE_ATOM(sisxvchromamin);
     pSiSUSB->xvChromaMax         = MAKE_ATOM(sisxvchromamax);
-    pSiSUSB->xv_QVF              = MAKE_ATOM(sisxvqueryvbflags);
+#ifdef XV_SD_DEPRECATED
+    pSiSUSB->xv_QVF           = MAKE_ATOM(sisxvqueryvbflags);
     pSiSUSB->xv_GDV	      = MAKE_ATOM(sisxvsdgetdriverversion);
     pSiSUSB->xv_GHI	      = MAKE_ATOM(sisxvsdgethardwareinfo);
     pSiSUSB->xv_GBI	      = MAKE_ATOM(sisxvsdgetbusid);
@@ -918,6 +510,7 @@ SISUSBSetupImageVideo(ScreenPtr pScreen)
     pSiSUSB->xv_PMD	      = MAKE_ATOM(sisxvsdpanelmode);
 #ifdef TWDEBUG
     pSiSUSB->xv_STR	      = MAKE_ATOM(sisxvsetreg);
+#endif
 #endif
 
     pSiSUSB->xv_sisdirectunlocked = 0;
@@ -990,13 +583,22 @@ RegionsEqual(RegionPtr A, RegionPtr B)
 #endif
 #endif
 
+void
+SISUSBUpdateVideoParms(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
+{
+  set_allowswitchcrt(pSiSUSB, pPriv);
+#ifdef SIS_ENABLEXV
+  set_dispmode(pSiSUSB->pScrn, pPriv);
+#endif
+  set_maxencoding(pSiSUSB, pPriv);
+}
+
 static int
 SISUSBSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute,
   		    INT32 value, pointer data)
 {
   SISUSBPortPrivPtr pPriv = (SISUSBPortPrivPtr)data;
   SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
-
 
   if(attribute == pSiSUSB->xvBrightness) {
      if((value < -128) || (value > 127))
@@ -1024,9 +626,9 @@ SISUSBSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute,
         return BadValue;
      pPriv->disablegfxlr = value;
   } else if(attribute == pSiSUSB->xvTVXPosition) {
-
+     /* Nop */
   } else if(attribute == pSiSUSB->xvTVYPosition) {
-
+     /* Nop */
   } else if(attribute == pSiSUSB->xvDisableColorkey) {
      if((value < 0) || (value > 1))
         return BadValue;
@@ -1047,220 +649,48 @@ SISUSBSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute,
      pPriv->chromamin = value;
   } else if(attribute == pSiSUSB->xvChromaMax) {
      pPriv->chromamax = value;
-  } else if(attribute == pSiSUSB->xv_USD) {
-     if(pSiSUSB->enablesisctrl) {
-        if(value == SIS_DIRECTKEY) {
-	   pSiSUSB->xv_sisdirectunlocked++;
-	} else if(pSiSUSB->xv_sisdirectunlocked) {
-	   pSiSUSB->xv_sisdirectunlocked--;
-	}
-     } else {
-     	pSiSUSB->xv_sisdirectunlocked = 0;
-     }
-  } else if(attribute == pSiSUSB->xv_SVF) {
-        if(pSiSUSB->xv_sisdirectunlocked) {
-#ifdef SIS_ENABLEXV
-	   set_dispmode(pScrn, pPriv);
-#endif
-	   set_allowswitchcrt(pSiSUSB, pPriv);
-	   set_maxencoding(pSiSUSB, pPriv);
-        }
-  } else if(attribute == pSiSUSB->xv_CT1) {
-        if(pSiSUSB->xv_sisdirectunlocked) {
-#ifdef SIS_ENABLEXV
-	   set_dispmode(pScrn, pPriv);
-#endif
-	   set_allowswitchcrt(pSiSUSB, pPriv);
-	   set_maxencoding(pSiSUSB, pPriv);
-        }
-  } else if(attribute == pSiSUSB->xv_RDT) {
-        /* nil */
-  } else if(attribute == pSiSUSB->xv_TAF) {
-     	/* nil */
-  } else if(attribute == pSiSUSB->xv_TSA) {
-     	/* nil */
-  } else if(attribute == pSiSUSB->xv_TEE) {
-
-  } else if(attribute == pSiSUSB->xv_CFI) {
-
-  } else if(attribute == pSiSUSB->xv_YFI) {
-
-  } else if(attribute == pSiSUSB->xv_COC) {
-
-  } else if(attribute == pSiSUSB->xv_COF) {
-
-  } else if(attribute == pSiSUSB->xv_TCO) {
-
-  } else if(attribute == pSiSUSB->xv_TTE) {
-
-  } else if(attribute == pSiSUSB->xv_TCF) {
-
-  } else if(attribute == pSiSUSB->xv_TLF) {
-
-  } else if(attribute == pSiSUSB->xv_TCC) {
-
-  } else if(attribute == pSiSUSB->xv_OVR) {
-
-  } else if(attribute == pSiSUSB->xv_CMD) {
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        pSiSUSB->xv_sd_result = (value & 0xffffff00);
-     }
-  } else if(attribute == pSiSUSB->xv_SGA) {
-     if(pSiSUSB->xv_sisdirectunlocked) {
-#ifdef SIS_ENABLEXV
-        Bool backup = pSiSUSB->XvGamma;
-#endif
-        pSiSUSB->CRT1gamma = (value & 0x01) ? TRUE : FALSE;
-	pSiSUSB->XvGamma = (value & 0x04) ? TRUE : FALSE;
-#ifdef SIS_ENABLEXV
-        if(backup != pSiSUSB->XvGamma) {
-	   SiSUSBUpdateXvGamma(pSiSUSB, pPriv);
-	}
-#endif
-     }
-  } else if(attribute == pSiSUSB->xv_TXS) {
-     if((value < -16) || (value > 16))
+  } else if(attribute == pSiSUSB->xvHue) {
+     if((value < -8) || (value > 7))
         return BadValue;
-  } else if(attribute == pSiSUSB->xv_TYS) {
-     if((value < -4) || (value > 3))
+     pPriv->hue = value;
+  } else if(attribute == pSiSUSB->xvSaturation) {
+     if((value < -7) || (value > 7))
         return BadValue;
-  } else if(attribute == pSiSUSB->xv_BRR) {
+     pPriv->saturation = value;
+  } else if(attribute == pSiSUSB->xvGammaRed) {
      if((value < 100) || (value > 10000))
         return BadValue;
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        pSiSUSB->GammaBriR = value;
-     }
-  } else if(attribute == pSiSUSB->xv_BRG) {
-     if((value < 100) || (value > 10000))
-        return BadValue;
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        pSiSUSB->GammaBriG = value;
-     }
-  } else if(attribute == pSiSUSB->xv_BRB) {
-     if((value < 100) || (value > 10000))
-        return BadValue;
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        pSiSUSB->GammaBriB = value;
-     }
-  } else if(attribute == pSiSUSB->xv_PBR) {
-     if((value < 100) || (value > 10000))
-        return BadValue;
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        pSiSUSB->GammaPBriR = value;
-     }
-  } else if(attribute == pSiSUSB->xv_PBG) {
-     if((value < 100) || (value > 10000))
-        return BadValue;
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        pSiSUSB->GammaPBriG = value;
-     }
-  } else if(attribute == pSiSUSB->xv_PBB) {
-     if((value < 100) || (value > 10000))
-        return BadValue;
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        pSiSUSB->GammaPBriB = value;
-     }
-  } else if(attribute == pSiSUSB->xv_BRR2) {
-
-  } else if(attribute == pSiSUSB->xv_BRG2) {
-
-  } else if(attribute == pSiSUSB->xv_BRB2) {
-
-  } else if(attribute == pSiSUSB->xv_PBR2) {
-
-  } else if(attribute == pSiSUSB->xv_PBG2) {
-
-  } else if(attribute == pSiSUSB->xv_PBB2) {
-
-  } else if(attribute == pSiSUSB->xv_GARC2) {
-
-  } else if(attribute == pSiSUSB->xv_GAGC2) {
-
-  } else if(attribute == pSiSUSB->xv_GABC2) {
-
-  } else if(attribute == pSiSUSB->xv_BRRC2) {
-
-  } else if(attribute == pSiSUSB->xv_BRGC2) {
-
-  } else if(attribute == pSiSUSB->xv_BRBC2) {
-
-  } else if(attribute == pSiSUSB->xv_PBRC2) {
-
-  } else if(attribute == pSiSUSB->xv_PBGC2) {
-
-  } else if(attribute == pSiSUSB->xv_PBBC2) {
-
-  } else if(attribute == pSiSUSB->xv_SHC) {
-     if(pSiSUSB->xv_sisdirectunlocked) {
-        Bool VisibleBackup = pSiSUSB->HWCursorIsVisible;
-        pSiSUSB->HideHWCursor = value ? TRUE : FALSE;
-	if(pSiSUSB->CursorInfoPtr) {
-	   if(VisibleBackup) {
-	      if(value) {
-	         (pSiSUSB->CursorInfoPtr->HideCursor)(pScrn);
-	      } else {
-	         (pSiSUSB->CursorInfoPtr->ShowCursor)(pScrn);
-	      }
-	   }
-	   pSiSUSB->HWCursorIsVisible = VisibleBackup;
-	}
-     }
-  } else if(attribute == pSiSUSB->xv_PMD) {
-
-#ifdef TWDEBUG
-  } else if(attribute == pSiSUSB->xv_STR) {
-     ULong port;
-     switch((value & 0xff000000) >> 24) {
-     case 0x00: port = SISSR;    break;
-     case 0x01: port = SISPART1; break;
-     case 0x02: port = SISPART2; break;
-     case 0x03: port = SISPART3; break;
-     case 0x04: port = SISPART4; break;
-     case 0x05: port = SISCR;    break;
-     case 0x06: port = SISVID;   break;
-     default:   return BadValue;
-     }
-     outSISIDXREG(pSiSUSB, port,((value & 0x00ff0000) >> 16), ((value & 0x0000ff00) >> 8));
-     return Success;
-#endif
-  } else if(pSiSUSB->VGAEngine == SIS_315_VGA) {
-     if(attribute == pSiSUSB->xvSwitchCRT) {
-        if(pPriv->AllowSwitchCRT) {
-           if((value < 0) || (value > 1))
-              return BadValue;
-	   pPriv->crtnum = value;
-        }
-     } else if(attribute == pSiSUSB->xvHue) {
-       if((value < -8) || (value > 7))
-          return BadValue;
-       pPriv->hue = value;
-     } else if(attribute == pSiSUSB->xvSaturation) {
-       if((value < -7) || (value > 7))
-          return BadValue;
-       pPriv->saturation = value;
-     } else if(attribute == pSiSUSB->xvGammaRed) {
-       if((value < 100) || (value > 10000))
-          return BadValue;
-       pSiSUSB->XvGammaRed = value;
+     pSiSUSB->XvGammaRed = value;
 #ifdef SIS_ENABLEXV
-       SiSUSBUpdateXvGamma(pSiSUSB, pPriv);
+     SiSUSBUpdateXvGamma(pSiSUSB, pPriv);
 #endif
-     } else if(attribute == pSiSUSB->xvGammaGreen) {
-       if((value < 100) || (value > 10000))
-          return BadValue;
-       pSiSUSB->XvGammaGreen = value;
+  } else if(attribute == pSiSUSB->xvGammaGreen) {
+     if((value < 100) || (value > 10000))
+        return BadValue;
+     pSiSUSB->XvGammaGreen = value;
 #ifdef SIS_ENABLEXV
-       SiSUSBUpdateXvGamma(pSiSUSB, pPriv);
+     SiSUSBUpdateXvGamma(pSiSUSB, pPriv);
 #endif
-     } else if(attribute == pSiSUSB->xvGammaBlue) {
-       if((value < 100) || (value > 10000))
-          return BadValue;
-       pSiSUSB->XvGammaBlue = value;
+  } else if(attribute == pSiSUSB->xvGammaBlue) {
+     if((value < 100) || (value > 10000))
+        return BadValue;
+     pSiSUSB->XvGammaBlue = value;
 #ifdef SIS_ENABLEXV
-       SiSUSBUpdateXvGamma(pSiSUSB, pPriv);
+     SiSUSBUpdateXvGamma(pSiSUSB, pPriv);
 #endif
-     } else return BadMatch;
-  } else return BadMatch;
+  } else if(attribute == pSiSUSB->xvSwitchCRT) {
+     if(pPriv->AllowSwitchCRT) {
+        if((value < 0) || (value > 1))
+           return BadValue;
+	pPriv->crtnum = value;
+     }
+  } else {
+#ifdef XV_SD_DEPRECATED
+     return(SISUSBSetPortUtilAttribute(pScrn, attribute, value, pPriv));
+#else
+     return BadMatch;
+#endif
+  }
   return Success;
 }
 
@@ -1302,129 +732,27 @@ SISUSBGetPortAttribute(
      *value = pPriv->chromamin;
   } else if(attribute == pSiSUSB->xvChromaMax) {
      *value = pPriv->chromamax;
-  } else if(attribute == pSiSUSB->xv_QVF) {
-     *value = pSiSUSB->VBFlags;
-  } else if(attribute == pSiSUSB->xv_GDV) {
-     *value = SISUSBDRIVERIVERSION;
-  } else if(attribute == pSiSUSB->xv_GHI) {
-     *value = (pSiSUSB->ChipFlags & 0xffff) | (pSiSUSB->sishw_ext.jChipType << 16) | (pSiSUSB->ChipRev << 24);
-  } else if(attribute == pSiSUSB->xv_GBI) {
-     *value = 0x55aa0000 | ((pSiSUSB->USBBus & 0xff) << 8) | (pSiSUSB->USBDev & 0xff);
-  } else if(attribute == pSiSUSB->xv_QVV) {
-     *value = SIS_VBFlagsVersion;
-  } else if(attribute == pSiSUSB->xv_QDD) {
+  } else if(attribute == pSiSUSB->xvHue) {
+     *value = pPriv->hue;
+  } else if(attribute == pSiSUSB->xvSaturation) {
+     *value = pPriv->saturation;
+  } else if(attribute == pSiSUSB->xvGammaRed) {
+     *value = pSiSUSB->XvGammaRed;
+  } else if(attribute == pSiSUSB->xvGammaGreen) {
+     *value = pSiSUSB->XvGammaGreen;
+  } else if(attribute == pSiSUSB->xvGammaBlue) {
+     *value = pSiSUSB->XvGammaBlue;
+  } else if(attribute == pSiSUSB->xvSwitchCRT) {
      *value = 0;
-  } else if(attribute == pSiSUSB->xv_CT1) {
-     *value = 1;
-  } else if(attribute == pSiSUSB->xv_GSF) {
-     *value = pSiSUSB->SiS_SD_Flags;
-  } else if(attribute == pSiSUSB->xv_GSF2) {
-     *value = pSiSUSB->SiS_SD2_Flags;
-  } else if(attribute == pSiSUSB->xv_USD) {
-     *value = pSiSUSB->xv_sisdirectunlocked;
-  } else if(attribute == pSiSUSB->xv_TAF) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TSA) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TEE) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_CFI) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_YFI) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_COC) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_COF) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TCO) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TTE) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TCF) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TLF) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TCC) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_CMDR) {
-     *value = pSiSUSB->xv_sd_result;
-  } else if(attribute == pSiSUSB->xv_OVR) {
-     /* Changing of CRT2 settings not supported in DHM! */
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_SGA) {
-     *value = 0;
-     if(pSiSUSB->CRT1gamma) *value |= 0x01;
-     if(pSiSUSB->XvGamma)   *value |= 0x04;
-  } else if(attribute == pSiSUSB->xv_TXS) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_TYS) {
-     *value = 0;
-  } else if(attribute == pSiSUSB->xv_GSS) {
-     *value = (pScrn->virtualX << 16) | pScrn->virtualY;
-  } else if(attribute == pSiSUSB->xv_BRR) {
-     *value = pSiSUSB->GammaBriR;
-  } else if(attribute == pSiSUSB->xv_BRG) {
-     *value = pSiSUSB->GammaBriG;
-  } else if(attribute == pSiSUSB->xv_BRB) {
-     *value = pSiSUSB->GammaBriB;
-  } else if(attribute == pSiSUSB->xv_PBR) {
-     *value = pSiSUSB->GammaPBriR;
-  } else if(attribute == pSiSUSB->xv_PBG) {
-     *value = pSiSUSB->GammaPBriG;
-  } else if(attribute == pSiSUSB->xv_PBB) {
-     *value = pSiSUSB->GammaPBriB;
-  } else if(attribute == pSiSUSB->xv_BRR2) {
-     *value = pSiSUSB->GammaBriR;
-  } else if(attribute == pSiSUSB->xv_BRG2) {
-     *value = pSiSUSB->GammaBriG;
-  } else if(attribute == pSiSUSB->xv_BRB2) {
-     *value = pSiSUSB->GammaBriB;
-  } else if(attribute == pSiSUSB->xv_PBR2) {
-    *value = pSiSUSB->GammaPBriR;
-  } else if(attribute == pSiSUSB->xv_PBG2) {
-    *value = pSiSUSB->GammaPBriG;
-  } else if(attribute == pSiSUSB->xv_PBB2) {
-    *value = pSiSUSB->GammaPBriB;
-  } else if(attribute == pSiSUSB->xv_GARC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_GAGC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_GABC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_BRRC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_BRGC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_BRBC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_PBRC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_PBGC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_PBBC2) {
-     *value = 1000;
-  } else if(attribute == pSiSUSB->xv_SHC) {
-     *value = pSiSUSB->HideHWCursor ? 1 : 0;
-  } else if(attribute == pSiSUSB->xv_PMD) {
-     *value = 0;
-  } else if(pSiSUSB->VGAEngine == SIS_315_VGA) {
-     if(attribute == pSiSUSB->xvSwitchCRT) {
-        *value = 0;
-     } else if(attribute == pSiSUSB->xvHue) {
-        *value = pPriv->hue;
-     } else if(attribute == pSiSUSB->xvSaturation) {
-        *value = pPriv->saturation;
-     } else if(attribute == pSiSUSB->xvGammaRed) {
-        *value = pSiSUSB->XvGammaRed;
-     } else if(attribute == pSiSUSB->xvGammaGreen) {
-        *value = pSiSUSB->XvGammaGreen;
-     } else if(attribute == pSiSUSB->xvGammaBlue) {
-        *value = pSiSUSB->XvGammaBlue;
-     } else return BadMatch;
-  } else return BadMatch;
+  } else {
+#ifdef XV_SD_DEPRECATED
+     return(SISUSBGetPortUtilAttribute(pScrn, attribute, value, pPriv));
+#else
+     return BadMatch;
+#endif
+  }
   return Success;
 }
-
 
 static void
 SISUSBQueryBestSize(
@@ -2648,8 +1976,8 @@ SISUSBInitOffscreenImages(ScreenPtr pScreen)
     for(i = 0; i < num; i++) {
        SISUSBOffscreenImages[i].max_width  = DummyEncoding.width;
        SISUSBOffscreenImages[i].max_height = DummyEncoding.height;
-       SISUSBOffscreenImages[i].num_attributes = NUM_ATTRIBUTES_315;
        SISUSBOffscreenImages[i].attributes = &SISUSBAttributes_315[0];
+       SISUSBOffscreenImages[i].num_attributes = SiSUSBCountAttributes(&SISUSBAttributes_315[0]);
     }
     xf86XVRegisterOffscreenImages(pScreen, SISUSBOffscreenImages, num);
 }

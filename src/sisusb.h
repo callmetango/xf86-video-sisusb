@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb.h,v 1.3 2005/01/28 17:31:33 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Main global data and definitions
  *
@@ -35,8 +35,8 @@
 #define _SISUSB_H_
 
 #define SISUSBDRIVERVERSIONYEAR    5
-#define SISUSBDRIVERVERSIONMONTH   1
-#define SISUSBDRIVERVERSIONDAY     28
+#define SISUSBDRIVERVERSIONMONTH   4
+#define SISUSBDRIVERVERSIONDAY     21
 #define SISUSBDRIVERREVISION       1
 
 #define SISUSBDRIVERIVERSION ((SISUSBDRIVERVERSIONYEAR << 16) |  \
@@ -132,9 +132,17 @@
 
 #undef SIS_ENABLEXV		/* Enable/Disable Xv overlay support */
 
+#define XV_SD_DEPRECATED	/* Include deprecated Xv interface for SiSCtrl */
+
 /* End of configurable stuff --------------------------------- */
 
 #define UNLOCK_ALWAYS		/* Always unlock the registers (should be set!) */
+
+/* Need that for SiSCtrl */
+#define NEED_REPLIES		/* ? */
+#define EXTENSION_PROC_ARGS void *
+#include "extnsionst.h" 	/* required */
+#include "panoramiXproto.h" 	/* required */
 
 #undef SISGAMMARAMP
 #ifdef XORG_VERSION_CURRENT
@@ -378,6 +386,14 @@ typedef unsigned char  UChar;
 #define SiS_SD2_VIDEOBRIDGE    0x00000400   /* Any type of video bridge present */
 #define SiS_SD2_THIRDPARTYLVDS 0x00000800   /* Third party LVDS (non-SiS) */
 #define SiS_SD2_ADDLFLAGS      0x00001000   /* Following flags valid */
+#define SiS_SD2_SUPPORT760OO   0x00002000   /* Support dynamic one/two overlay configuration changes         */
+					    /*    (If set, utility must re-read SD2 flags after mode change) */
+#define SiS_SD2_SIS760ONEOVL   0x00004000   /* (76x:) Only one overlay currently */
+#define SiS_SD2_MERGEDUCLOCK   0x00008000   /* Provide VRefresh in mode->Clock field in MergedFB mode */
+#define SiS_SD2_SUPPORTXVHUESAT 0x00010000  /* Xv: Support hue & saturation */
+#define SiS_SD2_NEEDUSESSE     0x00020000   /* Need "UseSSE" option to use SSE (otherwise auto) */
+#define SiS_SD2_NODDCSUPPORT   0x00040000   /* No hardware DDC support (USB) */
+#define SiS_SD2_SUPPORTXVDEINT 0x00080000   /* Xv deinterlacing supported (n/a) */
 /* ... */
 #define SiS_SD2_NOOVERLAY      0x80000000   /* No video overlay */
 
@@ -592,6 +608,7 @@ typedef struct {
     CARD32		CmdQueMaxLen;           /* (6326/5597/5598) Amount of cmds the queue can hold */
     CARD32		detectedCRT2Devices;	/* detected CRT2 devices before mask-out */
     Bool		noInternalModes;	/* Use our own default modes? */
+    Bool		SCLogQuiet;
 
     int			EMI;
     UChar       	postVBCR32;
@@ -666,6 +683,9 @@ typedef struct {
     void 		*VGAMemBase; /* mapped */
     Bool		VGAPaletteEnabled;
     Bool		VGACMapSaved;
+
+    ExtensionEntry	*SiSCtrlExtEntry;
+    char		devsectname[32];
 
     /* accel wrapper */
 #if 0

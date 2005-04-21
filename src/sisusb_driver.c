@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_driver.c,v 1.4 2005/01/28 17:31:33 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * SiSUSB driver main code
  *
@@ -745,7 +745,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 	"Copyright (C) 2001-2005 Thomas Winischhofer <thomas@winischhofer.net>\n");
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-        "*** See http://www.winischhofer.net/linuxsisusbvga.shtml\n");
+        "*** See http://www.winischhofer.at/linuxsisusbvga.shtml\n");
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 	"*** for documentation and updates.\n");
 
@@ -829,10 +829,11 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     pSiSUSB->HWCursorMBufNum = pSiSUSB->HWCursorCBufNum = 0;
     pSiSUSB->NeedFlush = FALSE;
 
+    pSiSUSB->VGAEngine = SIS_315_VGA;
     pSiSUSB->sishw_ext.jChipType = SIS_315PRO;
     pSiSUSB->ChipFlags |= (SiSCF_Is315USB | SiSCF_315Core | SiSCF_MMIOPalette);
-    pSiSUSB->VGAEngine = SIS_315_VGA;
     pSiSUSB->SiS_SD_Flags |= SiS_SD_IS315SERIES;
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_SUPPORTXVHUESAT;
     pSiSUSB->myCR63 = 0x63;
     pSiSUSB->mmioSize = 128;
 
@@ -923,9 +924,20 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
      * supports this conversion. (24to32 seems not implemented though)
      * Additionally, determine the size of the HWCursor memory area.
      */
-
     pSiSUSB->CursorSize = 16384;
     pix24flags = Support32bppFb;
+
+    /* Save the name of our Device section for SiSCtrl usage */
+    {
+       int ttt = 0;
+       GDevPtr device = xf86GetDevFromEntity(pScrn->entityList[0],
+						pScrn->entityInstanceList[0]);
+       if(device && device->identifier) {
+          if((ttt = strlen(device->identifier)) > 31) ttt = 31;
+	  strncpy(&pSiSUSB->devsectname[0], device->identifier, 31);
+       }
+       pSiSUSB->devsectname[ttt] = 0;
+    }
 
     pSiSUSB->ForceCursorOff = FALSE;
 
@@ -1620,53 +1632,6 @@ SISUSBBlockHandler(int i, pointer blockData, pointer pTimeout, pointer pReadmask
 
 }
 
-/* Our MessageHandler */
-#ifdef X_XF86MiscPassMessage
-static int
-SISUSBHandleMessage(int scrnIndex, const char *msgtype, const char *msgval, char **retmsg)
-{
-    ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
-    SISUSBPtr      pSiSUSB = SISUSBPTR(pScrn);
-
-    strncpy(pSiSUSB->messagebuffer, "NIL", 63);
-
-    if(strcmp(msgtype, "SiSCtrl")) return BadMatch;
-
-    if(!strncmp(msgval, "SD_NUMCOMMANDS", 14)) {
-
-       sprintf(pSiSUSB->messagebuffer, "OK %d", 3);
-
-    } else if(!strncmp(msgval, "SD_CHECKMODEINDEXFORCRT2", 24)) {
-
-        ULong ulbuf;
-
-	if(sscanf((char *)(msgval + 24), "%lx", &ulbuf) == 1) {
-           ulbuf &= 0xffffff00;
-           sprintf(pSiSUSB->messagebuffer, "OK %lx", ulbuf);
-	} else {
-	   strcpy(pSiSUSB->messagebuffer, "ERROR");
-	}
-
-    } else if(!strncmp(msgval, "SD_CHECKMODETIMINGFORCRT2", 25)) {
-
-        int hd, hss, hse, ht, vd, vss, vse, vt, clk;
-	ULong ulbuf;
-
-        if(sscanf((char *)(msgval + 25), "%lx %d %d %d %d %d %d %d %d %d",
-		&ulbuf, &clk, &hd, &hss, &hse, &ht, &vd, &vss, &vse, &vt) == 10) {
-           sprintf(pSiSUSB->messagebuffer, "OK %lx", 0);
-        } else {
-	   strcpy(pSiSUSB->messagebuffer, "ERROR");
-	}
-
-    } else
-       return BadMatch;
-
-    *retmsg = pSiSUSB->messagebuffer;
-    return 0;
-}
-#endif
-
 /* Mandatory
  * This gets called at the start of each server generation
  *
@@ -2018,6 +1983,10 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pSiSUSB->SiS_SD2_Flags |= SiS_SD2_NOOVERLAY;
 #endif
 
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_NODDCSUPPORT;
+
+    SiSUSBCtrlExtInit(pScrn);
+
     return TRUE;
 }
 
@@ -2043,24 +2012,6 @@ SISUSBSwitchMode(int scrnIndex, DisplayModePtr mode, int flags)
     if(!(SISUSBModeInit(xf86Screens[scrnIndex], mode))) return FALSE;
 
     return TRUE;
-}
-
-Bool
-SISUSBSwitchCRT2Type(ScrnInfoPtr pScrn, ULong newvbflags)
-{
-    return FALSE;
-}
-
-Bool
-SISUSBRedetectCRT2Devices(ScrnInfoPtr pScrn)
-{
-    return TRUE;
-}
-
-Bool
-SISUSBSwitchCRT1Status(ScrnInfoPtr pScrn, int onoff)
-{
-    return FALSE;
 }
 
 static void
@@ -2198,6 +2149,10 @@ SISUSBCloseScreen(int scrnIndex, ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86Screens[scrnIndex];
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
+
+    if(pSiSUSB->SiSCtrlExtEntry) {
+       SiSUSBCtrlExtUnregister(pSiSUSB, pScrn->scrnIndex);
+    }
 
     if(pScrn->vtSema) {
 
