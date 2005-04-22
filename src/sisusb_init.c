@@ -2,7 +2,7 @@
 /* $XdotOrg$ */
 /*
  * Mode initializing code (CRT1 section) for SiS315/USB
- * (Universal module for Linux kernel framebuffer and XFree86 4.x)
+ * (Universal module for Linux kernel framebuffer and X.org/XFree86 4.x)
  *
  * Copyright (C) 2001-2005 by Thomas Winischhofer, Vienna, Austria
  *

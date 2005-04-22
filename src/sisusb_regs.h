@@ -27,6 +27,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
+ * Author:  	Thomas Winischhofer <thomas@winischhofer.net>
+ *
  */
 
 #ifndef _SISUSB_REGS_H_

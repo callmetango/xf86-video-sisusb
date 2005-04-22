@@ -47,7 +47,6 @@
  * * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Author: 	Thomas Winischhofer <thomas@winischhofer.net>
- *		Silicon Integrated Systems, Inc. (used by permission)
  *
  */
 

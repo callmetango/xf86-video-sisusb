@@ -30,8 +30,6 @@
  *
  * Author:  	Thomas Winischhofer <thomas@winischhofer.net>
  *
- * 2003/08/18: Added VRAM queue support
- *
  */
 
 /* Engine commands */
@@ -226,15 +224,15 @@
 #define SiSUSBGetSwWP() (CARD32)(*(pSiSUSB->cmdQ_SharedWritePort))
 #define SiSUSBGetHwRP() (CARD32)(SIS_MMIO_IN32(pSiSUSB->IOBase, Q_READ_PTR))
 
-#define SiSUSBFlushCmdBuf 
+#define SiSUSBFlushCmdBuf
 
 #define SiSUSBSyncWP    \
   SiSUSBFlushCmdBuf;    \
-  SIS_MMIO_OUT32(pSiSUSB->IOBase, Q_WRITE_PTR, (CARD32)(*(pSiSUSB->cmdQ_SharedWritePort))); 
-    
+  SIS_MMIO_OUT32(pSiSUSB->IOBase, Q_WRITE_PTR, (CARD32)(*(pSiSUSB->cmdQ_SharedWritePort)));
+
 #define SiSUSBSetHwWP(p) \
   *(pSiSUSB->cmdQ_SharedWritePort) = (p);   	\
-  SIS_MMIO_OUT32(pSiSUSB->IOBase, Q_WRITE_PTR, (p)); 
+  SIS_MMIO_OUT32(pSiSUSB->IOBase, Q_WRITE_PTR, (p));
 
 #define SiSUSBSetSwWP(p) *(pSiSUSB->cmdQ_SharedWritePort) = (p);
 
@@ -707,9 +705,9 @@
       }
 
 typedef struct _SiSUSB_Packet12_YUV {
-      CARD32 P12_Header0;   	
-      CARD32 P12_Header1;	
-      CARD16 P12_UVPitch;	/* 8200 UV if planar, Y if packed */   
+      CARD32 P12_Header0;
+      CARD32 P12_Header1;
+      CARD16 P12_UVPitch;	/* 8200 UV if planar, Y if packed */
       CARD16 P12_Unused0;	/* 8202 */
       CARD16 P12_YPitch;	/* 8204 Y if planar */
       CARD16 P12_AGPBase;	/* 8206 */
@@ -735,7 +733,7 @@ typedef struct _SiSUSB_Packet12_YUV {
       CARD32 P12_Command;	/* 823c */
       CARD32 P12_Null1;
       CARD32 P12_Null2;
-} SiSUSB_Packet12_YUV;      
+} SiSUSB_Packet12_YUV;
 
 #define SiSUSBWritePacketPart(part1, part2, part3, part4) \
       { \
@@ -748,7 +746,7 @@ typedef struct _SiSUSB_Packet12_YUV {
          SiSUSBUpdateQueue \
 	 SiSUSBSetSwWP(ttt); \
       }
-      
+
 #endif  /* VRAM mode */
 
 /* ---- MMIO mode ---- */

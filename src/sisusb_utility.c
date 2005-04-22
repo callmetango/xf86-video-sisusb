@@ -1199,11 +1199,11 @@ SISUSBGetPortUtilAttribute(ScrnInfoPtr pScrn,  Atom attribute,
   } else if(attribute == pSiSUSB->xv_BRB) {
      *value = pSiSUSB->GammaBriB;
   } else if(attribute == pSiSUSB->xv_PBR) {
-     *value = pSiSUSB->GammaPBriR;
+     *value = 1000;
   } else if(attribute == pSiSUSB->xv_PBG) {
-     *value = pSiSUSB->GammaPBriG;
+     *value = 1000;
   } else if(attribute == pSiSUSB->xv_PBB) {
-     *value = pSiSUSB->GammaPBriB;
+     *value = 1000;
   } else if(attribute == pSiSUSB->xv_BRR2) {
      *value = pSiSUSB->GammaBriR;
   } else if(attribute == pSiSUSB->xv_BRG2) {
@@ -1211,11 +1211,11 @@ SISUSBGetPortUtilAttribute(ScrnInfoPtr pScrn,  Atom attribute,
   } else if(attribute == pSiSUSB->xv_BRB2) {
      *value = pSiSUSB->GammaBriB;
   } else if(attribute == pSiSUSB->xv_PBR2) {
-    *value = pSiSUSB->GammaPBriR;
+     *value = 1000;
   } else if(attribute == pSiSUSB->xv_PBG2) {
-    *value = pSiSUSB->GammaPBriG;
+     *value = 1000;
   } else if(attribute == pSiSUSB->xv_PBB2) {
-    *value = pSiSUSB->GammaPBriB;
+     *value = 1000;
   } else if(attribute == pSiSUSB->xv_GARC2) {
      *value = 1000;
   } else if(attribute == pSiSUSB->xv_GAGC2) {

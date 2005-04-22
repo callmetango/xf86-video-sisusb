@@ -30,8 +30,6 @@
  *
  * Author:  	Thomas Winischhofer <thomas@winischhofer.net>
  *
- * 2003/08/18: Rewritten for using VRAM command queue
- *
  */
 
 #include "sisusb.h"

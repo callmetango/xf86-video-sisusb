@@ -578,14 +578,11 @@ SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
    int    i, j, nramp;
    UShort *ramp[3];
-   float  gamma_max[3], gamma_prescale[3], framp;
+   float  gamma_max[3], framp;
 
    gamma_max[0] = (float)pSiSUSB->GammaBriR / 1000;
    gamma_max[1] = (float)pSiSUSB->GammaBriG / 1000;
    gamma_max[2] = (float)pSiSUSB->GammaBriB / 1000;
-   gamma_prescale[0] = (float)pSiSUSB->GammaPBriR / 1000;
-   gamma_prescale[1] = (float)pSiSUSB->GammaPBriG / 1000;
-   gamma_prescale[2] = (float)pSiSUSB->GammaPBriB / 1000;
 
    if(!(nramp = xf86GetGammaRampSize(pScreen))) return;
 
@@ -601,7 +598,7 @@ SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
    for(i = 0; i < 3; i++) {
       int fullscale = 65535 * gamma_max[i];
       float dramp = 1. / (nramp - 1);
-      float invgamma=0.0, v;
+      float invgamma = 0.0, v;
 
       switch(i) {
       case 0: invgamma = 1. / pScrn->gamma.red; break;
@@ -610,7 +607,7 @@ SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
       }
 
       for(j = 0; j < nramp; j++) {
-         framp = pow(gamma_prescale[i] * j * dramp, invgamma);
+         framp = pow(j * dramp, invgamma);
 
          v = (fullscale < 0) ? (65535 + fullscale * framp) :
 	 		       fullscale * framp;
@@ -1890,9 +1887,9 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     }
 
 #ifdef SISGAMMARAMP
-    if((pSiSUSB->GammaBriR != 1000) || (pSiSUSB->GammaBriG != 1000) ||
-       (pSiSUSB->GammaBriB != 1000) || (pSiSUSB->GammaPBriR != 1000) ||
-       (pSiSUSB->GammaPBriG != 1000) || (pSiSUSB->GammaPBriB != 1000)) {
+    if((pSiSUSB->GammaBriR != 1000) ||
+       (pSiSUSB->GammaBriB != 1000) ||
+       (pSiSUSB->GammaBriG != 1000)) {
        SISUSBCalculateGammaRamp(pScreen, pScrn);
     }
 #endif

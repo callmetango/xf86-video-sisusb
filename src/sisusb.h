@@ -27,7 +27,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors:   Thomas Winischhofer <thomas@winischhofer.net>
+ * Author:   Thomas Winischhofer <thomas@winischhofer.net>
  *
  */
 
@@ -36,7 +36,7 @@
 
 #define SISUSBDRIVERVERSIONYEAR    5
 #define SISUSBDRIVERVERSIONMONTH   4
-#define SISUSBDRIVERVERSIONDAY     21
+#define SISUSBDRIVERVERSIONDAY     23
 #define SISUSBDRIVERREVISION       1
 
 #define SISUSBDRIVERIVERSION ((SISUSBDRIVERVERSIONYEAR << 16) |  \
@@ -666,7 +666,6 @@ typedef struct {
     UChar *		CurMonoSrc;
     CARD32 *		CurARGBDest;
     int			GammaBriR, GammaBriG, GammaBriB;
-    int			GammaPBriR, GammaPBriG, GammaPBriB;
     Bool		HideHWCursor;  /* Custom application */
     Bool		HWCursorIsVisible;
     ULong       	HWCursorBackup[16];

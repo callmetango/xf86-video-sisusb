@@ -3,6 +3,11 @@
 /*
  * Xv driver for SiS 315 USB
  *
+ * Note: The version of the 315 used in my dongle does not seem
+ * to support Xv at all. The overlay just won't show up. However,
+ * Xv is left enabled since I don't know if other versions of the
+ * dongle support the overlay.
+ *
  * Copyright (C) 2001-2005 by Thomas Winischhofer, Vienna, Austria.
  *
  * Redistribution and use in source and binary forms, with or without

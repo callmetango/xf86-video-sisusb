@@ -27,8 +27,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * Authors:  	Thomas Winischhofer <thomas@winischhofer.net>
- *              ?
+ * Author:  	Thomas Winischhofer <thomas@winischhofer.net>
+ *
  */
 
 #include "sisusb.h"
@@ -60,9 +60,7 @@ typedef enum {
     OPTION_XVYUVCHROMAKEY,
     OPTION_ENABLESISCTRL,
     OPTION_STOREDBRI,
-    OPTION_STOREDPBRI,
     OPTION_STOREDBRI2,
-    OPTION_STOREDPBRI2,
     OPTION_DISCONNTIMEOUT,
     OPTION_PSEUDO
 } SISUSBOpts;
@@ -79,9 +77,7 @@ static const OptionInfoRec SISUSBOptions[] = {
     { OPTION_RESTOREBYSET,		"RestoreBySetMode", 	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_CRT1GAMMA,			"CRT1Gamma", 	  	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_STOREDBRI,			"GammaBrightness",  	  OPTV_STRING,    {0}, FALSE },
-    { OPTION_STOREDPBRI,		"GammaPreBrightness",	  OPTV_STRING,    {0}, FALSE },
     { OPTION_STOREDBRI,			"StoredGammaBrightness",  OPTV_STRING,    {0}, FALSE },
-    { OPTION_STOREDPBRI,		"StoredGammaPreBrightness",OPTV_STRING,   {0}, FALSE },
     { OPTION_XVGAMMA,			"XvGamma", 	  	  OPTV_STRING,    {0}, FALSE },
     { OPTION_XVDEFCONTRAST,		"XvDefaultContrast", 	  OPTV_INTEGER,   {0}, FALSE },
     { OPTION_XVDEFBRIGHTNESS,		"XvDefaultBrightness", 	  OPTV_INTEGER,   {0}, FALSE },
@@ -238,7 +234,6 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     pSiSUSB->XvGammaRed = pSiSUSB->XvGammaGreen = pSiSUSB->XvGammaBlue =
           pSiSUSB->XvGammaRedDef = pSiSUSB->XvGammaGreenDef = pSiSUSB->XvGammaBlueDef = 1000;
     pSiSUSB->GammaBriR = pSiSUSB->GammaBriG = pSiSUSB->GammaBriB = 1000;
-    pSiSUSB->GammaPBriR = pSiSUSB->GammaPBriG = pSiSUSB->GammaPBriB = 1000;
 
     pSiSUSB->HideHWCursor = FALSE;
     pSiSUSB->HWCursorIsVisible = FALSE;
@@ -465,18 +460,9 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
        }
     }
 
-    {
-       Bool GotBri = FALSE, GotPBri = FALSE;
-       if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_STOREDBRI))) {
-          SiSUSB_EvalOneOrThreeFloats(pScrn, OPTION_STOREDBRI, briopt, strptr,
-	  	&pSiSUSB->GammaBriR, &pSiSUSB->GammaBriG, &pSiSUSB->GammaBriB);
-	  GotBri = TRUE;
-       }
-       if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_STOREDPBRI))) {
-          SiSUSB_EvalOneOrThreeFloats(pScrn, OPTION_STOREDPBRI, briopt, strptr,
-	  	&pSiSUSB->GammaPBriR, &pSiSUSB->GammaPBriG, &pSiSUSB->GammaPBriB);
-	  GotPBri = TRUE;
-       }
+    if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_STOREDBRI))) {
+       SiSUSB_EvalOneOrThreeFloats(pScrn, OPTION_STOREDBRI, briopt, strptr,
+		&pSiSUSB->GammaBriR, &pSiSUSB->GammaBriG, &pSiSUSB->GammaBriB);
     }
 
 }

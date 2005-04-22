@@ -5,11 +5,6 @@
  *
  * Copyright (C) 2001-2005 by Thomas Winischhofer, Vienna, Austria.
  *
- * The SISUSBInit() function for old series (except TV and FIFO calculation)
- * was previously based on code which was Copyright (C) 1998,1999 by Alan
- * Hourihane, Wigan, England. However, the code has been rewritten entirely 
- * and is - it its current representation - not covered by this old copyright.
- *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -115,7 +110,7 @@ SISUSB300Init(ScrnInfoPtr pScrn, DisplayModePtr mode)
 void SISUSBVGAPreInit(ScrnInfoPtr pScrn)
 {
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
-    
+
     pSiSUSB->ModeInit = SISUSB300Init;
 
     pSiSUSB->VBFlags = pSiSUSB->VBFlags2 = 0; /* reset VBFlags */
@@ -164,7 +159,7 @@ SISUSBVGALock(SISUSBPtr pSiSUSB)
 void
 SiSUSBVGAUnlock(SISUSBPtr pSiSUSB)
 {
-    andSISIDXREG(pSiSUSB, SISCR, 0x11, 0x7f);	/* Unprotect CRTC[0-7] */    
+    andSISIDXREG(pSiSUSB, SISCR, 0x11, 0x7f);	/* Unprotect CRTC[0-7] */
 }
 
 static void
@@ -201,12 +196,12 @@ SiSUSBVGASaveColormap(ScrnInfoPtr pScrn, SISUSBRegPtr save)
     int i;
 
     if(pSiSUSB->VGACMapSaved) return;
-    
-    outSISREG(pSiSUSB, SISPEL, 0xff);			
-    
-    outSISREG(pSiSUSB, SISCOLIDXR, 0x00); 
+
+    outSISREG(pSiSUSB, SISPEL, 0xff);
+
+    outSISREG(pSiSUSB, SISCOLIDXR, 0x00);
     for(i = 0; i < 768; i++) {
-       save->sisDAC[i] = inSISREG(pSiSUSB, SISCOLDATA); 
+       save->sisDAC[i] = inSISREG(pSiSUSB, SISCOLDATA);
        (void)inSISREG(pSiSUSB, SISINPSTAT);
        (void)inSISREG(pSiSUSB, SISINPSTAT);
     }
@@ -235,13 +230,13 @@ SiSUSBVGARestoreMode(ScrnInfoPtr pScrn, SISUSBRegPtr restore)
     for(i = 1; i < 5; i++) {
        outSISIDXREG(pSiSUSB, SISSR, i, restore->sisRegs3C4[i]);
     }
-  
+
     outSISIDXREG(pSiSUSB, SISCR, 17, restore->sisRegs3D4[17] & ~0x80);
 
     for(i = 0; i < 25; i++) {
        outSISIDXREG(pSiSUSB, SISCR, i, restore->sisRegs3D4[i]);
     }
-    
+
     for(i = 0; i < 9; i++) {
        outSISIDXREG(pSiSUSB, SISGR, i, restore->sisRegsGR[i]);
     }
@@ -258,14 +253,14 @@ SiSUSBVGARestoreColormap(ScrnInfoPtr pScrn, SISUSBRegPtr restore)
 {
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     int i;
-    
+
     if(!pSiSUSB->VGACMapSaved) return;
-    
+
     outSISREG(pSiSUSB, SISPEL, 0xff);
-    
+
     outSISREG(pSiSUSB, SISCOLIDX, 0x00);
     for(i = 0; i < 768; i++) {
-       outSISREG(pSiSUSB, SISCOLDATA, restore->sisDAC[i]); 
+       outSISREG(pSiSUSB, SISCOLDATA, restore->sisDAC[i]);
        (void)inSISREG(pSiSUSB, SISINPSTAT);
        (void)inSISREG(pSiSUSB, SISINPSTAT);
     }
@@ -277,7 +272,7 @@ void
 SiSUSBVGARestore(ScrnInfoPtr pScrn, SISUSBRegPtr restore, int flags)
 {
     if(restore == NULL) return;
-    
+
     if(flags & SISVGA_SR_MODE)  SiSUSBVGARestoreMode(pScrn, restore);
     if(flags & SISVGA_SR_CMAP)  SiSUSBVGARestoreColormap(pScrn, restore);
 }
@@ -295,18 +290,18 @@ SiSUSB_SeqReset(SISUSBPtr pSiSUSB, Bool start)
 void
 SiSUSBVGAProtect(ScrnInfoPtr pScrn, Bool on)
 {
-    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn); 
+    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     UChar  tmp;
-  
+
     if(!pScrn->vtSema) return;
-  
+
     if(on) {
        inSISIDXREG(pSiSUSB, SISSR, 0x01, tmp);
        SiSUSB_SeqReset(pSiSUSB, TRUE);		/* start synchronous reset */
-       outSISIDXREG(pSiSUSB, SISSR, 0x01, tmp | 0x20);	/* disable display */	
+       outSISIDXREG(pSiSUSB, SISSR, 0x01, tmp | 0x20);	/* disable display */
        SiSUSB_EnablePalette(pSiSUSB);
     } else {
-       andSISIDXREG(pSiSUSB, SISSR, 0x01, ~0x20);	/* enable display */	
+       andSISIDXREG(pSiSUSB, SISSR, 0x01, ~0x20);	/* enable display */
        SiSUSB_SeqReset(pSiSUSB, FALSE);		/* clear synchronous reset */
        SiSUSB_DisablePalette(pSiSUSB);
     }
@@ -331,9 +326,9 @@ SiSUSBVGASaveScreen(ScreenPtr pScreen, int mode)
 {
     ScrnInfoPtr pScrn = NULL;
     Bool on = xf86IsUnblank(mode);
-   
+
     if(pScreen == NULL) return FALSE;
-   
+
     pScrn = xf86Screens[pScreen->myNum];
 
     if(pScrn->vtSema) {
