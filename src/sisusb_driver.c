@@ -391,6 +391,11 @@ SISUSBProbe(DriverPtr drv, int flags)
        return FALSE;
     }
 
+    /* This is to avoid referencing a null-ptr; xf86MatchDevice, strangely, returns
+     * 1 sometimes (probe, doconfigure cases) with an empty device list
+     */
+    if(devSections == NULL) return FALSE;
+
     /*
      * We need to probe the hardware first.  We then need to see how this
      * fits in with what is given in the config file, and allow the config
