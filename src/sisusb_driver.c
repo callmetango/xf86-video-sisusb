@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_driver.c,v 1.9 2005/06/25 21:16:56 ajax Exp $ */
 /*
  * SiSUSB driver main code
  *

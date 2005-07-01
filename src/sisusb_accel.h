@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_accel.h,v 1.2 2005/04/22 23:42:43 twini Exp $ */
 /*
  * 2D Acceleration for SiS 315/USB
  * Definitions for the SIS engine communication.

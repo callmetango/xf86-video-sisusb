@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_opt.c,v 1.2 2005/04/22 23:42:43 twini Exp $ */
 /*
  * SiSUSB driver option evaluation
  *

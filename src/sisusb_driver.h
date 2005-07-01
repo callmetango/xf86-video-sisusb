@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_driver.h,v 1.5 2005/06/21 11:29:37 twini Exp $ */
 /*
  * Global data and definitions
  *

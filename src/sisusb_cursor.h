@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_cursor.h,v 1.1 2005/01/25 15:54:02 twini Exp $ */
 /*
  * SiSUSB hardware cursor handling definitions
  *

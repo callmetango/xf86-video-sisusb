@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_types.h,v 1.3 2005/04/21 21:35:54 twini Exp $ */
 /*
  * General type definitions for universal mode switching modules
  *

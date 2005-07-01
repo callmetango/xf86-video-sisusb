@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_shadow.c,v 1.2 2005/01/27 17:57:51 twini Exp $ */
 /*
  * SiS USB driver shadow framebuffer handling
  *

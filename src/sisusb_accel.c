@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_accel.c,v 1.3 2005/04/22 23:42:43 twini Exp $ */
 /*
  * 2D Acceleration for SiS 315/USB - not functional!
  *

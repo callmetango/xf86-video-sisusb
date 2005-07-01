@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_struct.h,v 1.2 2005/01/26 01:21:20 twini Exp $ */
 /*
  * General structure definitions for universal mode switching modules
  *

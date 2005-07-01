@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_init.h,v 1.4 2005/01/28 17:58:39 twini Exp $ */
 /*
  * Data and prototypes for init.c
  *

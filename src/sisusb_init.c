@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_init.c,v 1.5 2005/04/22 23:42:43 twini Exp $ */
 /*
  * Mode initializing code (CRT1 section) for SiS315/USB
  * (Universal module for Linux kernel framebuffer and X.org/XFree86 4.x)

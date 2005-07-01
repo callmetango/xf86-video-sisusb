@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_video.c,v 1.5 2005/04/22 23:42:43 twini Exp $ */
 /*
  * Xv driver for SiS 315 USB
  *
