@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_init.h,v 1.4 2005/01/28 17:58:39 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Data and prototypes for init.c
  *
@@ -767,17 +767,15 @@ static const UCHAR SiS_SoftSetting  = 0x30;   /* RAM setting */
 
 void	SiSUSBRegInit(SiS_Private *SiS_Pr, SISIOADDRESS BaseAddr);
 
-USHORT	SiSUSB_GetModeID(int VGAEngine, ULONG VBFlags, int HDisplay, int VDisplay,
+USHORT	SiSUSB_GetModeID(int VGAEngine, unsigned int VBFlags, int HDisplay, int VDisplay,
 			int Depth, BOOLEAN FSTN, int LCDwith, int LCDheight);
-BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,ScrnInfoPtr pScrn,
-			USHORT ModeNo, BOOLEAN dosetpitch);
-BOOLEAN	SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo, ScrnInfoPtr pScrn,
-			DisplayModePtr mode, BOOLEAN IsCustom);
-USHORT	SiSUSB_CheckBuildCustomMode(ScrnInfoPtr pScrn, DisplayModePtr mode, int VBFlags);
+BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn, USHORT ModeNo, BOOLEAN dosetpitch);
+BOOLEAN	SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn, DisplayModePtr mode, BOOLEAN IsCustom);
+USHORT	SiSUSB_CheckBuildCustomMode(ScrnInfoPtr pScrn, DisplayModePtr mode, unsigned int VBFlags);
 DisplayModePtr SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes,
 			BOOLEAN isfordvi, BOOLEAN f2);
 void	SiSUSB_MakeClockRegs(ScrnInfoPtr pScrn, int clock, UCHAR *p2b, UCHAR *p2c);
-UShort	SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, ULong VBFlags);
+UShort	SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, unsigned int VBFlags);
 
 /* From other sis driver modules: */
 extern int	SiSUSB_compute_vclk(int Clock, int *out_n, int *out_dn, int *out_div,

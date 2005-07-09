@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_setup.c,v 1.1 2005/01/25 15:54:02 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Basic hardware and memory detection
  *
@@ -30,7 +30,7 @@
  * Author:  	Thomas Winischhofer <thomas@winischhofer.net>
  *
  */
- 
+
 #include "sisusb.h"
 #include "sisusb_regs.h"
 
@@ -62,19 +62,19 @@ sis315USBSetup(ScrnInfoPtr pScrn)
 	"Dual channel DDR SDRAM",
 	"Dual channel DDR SGRAM"
     };
-    
+
     inSISIDXREG(pSiSUSB, SISSR, 0x14, config);
     config1 = (config & 0x0C) >> 2;
-    
+
     inSISIDXREG(pSiSUSB, SISSR, 0x3A, sr3a);
     config2 = sr3a & 0x03;
-    
+
     inSISIDXREG(pSiSUSB, SISCR,0x5f,cr5f);
 
     pScrn->videoRam = (1 << ((config & 0xF0) >> 4)) * 1024;
 
     pSiSUSB->IsAGPCard = FALSE;
-    
+
     if(cr5f & 0x10) pSiSUSB->ChipFlags |= SiSCF_Is315E;
 
     /* If SINGLE_CHANNEL_2_RANK or DUAL_CHANNEL_1_RANK -> mem * 2 */
@@ -84,7 +84,7 @@ sis315USBSetup(ScrnInfoPtr pScrn)
 
     /* If DDR asymetric -> mem * 1,5 */
     if(config1 == 0x02) pScrn->videoRam += pScrn->videoRam/2;
-	   
+
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,
             "DRAM type: %s\n", dramTypeStr315[(config1 * 4) + config2]);
 
@@ -96,7 +96,7 @@ sis315USBSetup(ScrnInfoPtr pScrn)
 
     /* DDR -> mclk * 2 - needed for bandwidth calculation */
     if(config2 & 0x02) pSiSUSB->MemClock *= 2;
-    
+
     if(config1 == 0x02)
        pSiSUSB->BusWidth = busDDRA[(config & 0x03)];
     else if(config2 & 0x02)
@@ -120,7 +120,8 @@ SiSUSBSetup(ScrnInfoPtr pScrn)
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
     pSiSUSB->VBFlags = 0;
-    
+    pSiSUSB->VBFlags2 = 0;
+
     sis315USBSetup(pScrn);
 }
 

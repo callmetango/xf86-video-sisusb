@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_init.c,v 1.5 2005/04/22 23:42:43 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Mode initializing code (CRT1 section) for SiS315/USB
  * (Universal module for Linux kernel framebuffer and X.org/XFree86 4.x)
@@ -43,7 +43,7 @@
 /*********************************************/
 
 static void
-SiSUSB_InitPtr(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo)
+SiSUSB_InitPtr(SiS_Private *SiS_Pr)
 {
    SiS_Pr->SiS_ModeResInfo   = SiS_ModeResInfo;
    SiS_Pr->SiS_StandTable    = SiS_StandTable;
@@ -61,7 +61,7 @@ SiSUSB_InitPtr(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo)
 /*********************************************/
 
 USHORT
-SiSUSB_GetModeID(int VGAEngine, ULONG VBFlags, int HDisplay, int VDisplay,
+SiSUSB_GetModeID(int VGAEngine, unsigned int VBFlags, int HDisplay, int VDisplay,
               int Depth, BOOLEAN FSTN, int LCDwidth, int LCDheight)
 {
    USHORT ModeIndex = 0;
@@ -202,6 +202,7 @@ SiSUSBRegInit(SiS_Private *SiS_Pr, SISIOADDRESS BaseAddr)
    SiS_Pr->SiS_P3c8 = BaseAddr + 0x18;
    SiS_Pr->SiS_P3c9 = BaseAddr + 0x19;
    SiS_Pr->SiS_P3cb = BaseAddr + 0x1b;
+   SiS_Pr->SiS_P3cc = BaseAddr + 0x1c;
    SiS_Pr->SiS_P3cd = BaseAddr + 0x1d;
    SiS_Pr->SiS_P3da = BaseAddr + 0x2a;
    SiS_Pr->SiS_Part1Port = BaseAddr + SIS_CRT2_PORT_04;     /* Digital video interface registers (LCD) */
@@ -212,7 +213,7 @@ SiSUSBRegInit(SiS_Private *SiS_Pr, SISIOADDRESS BaseAddr)
 /*********************************************/
 
 static void
-SiS_GetSysFlags(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo)
+SiS_GetSysFlags(SiS_Private *SiS_Pr)
 {
    SiS_Pr->SiS_MyCR63 = 0x63;
 }
@@ -222,7 +223,7 @@ SiS_GetSysFlags(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo)
 /*********************************************/
 
 static void
-SiSInitPCIetc(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo)
+SiSInitPCIetc(SiS_Private *SiS_Pr)
 {
    SiS_SetReg(SiS_Pr,SiS_Pr->SiS_P3c4,0x20,0xa1);
    /*  - Enable 2D (0x40)
@@ -297,7 +298,7 @@ SiS_ResetSegmentRegOver(SiS_Private *SiS_Pr)
 }
 
 static void
-SiS_ResetSegmentRegisters(SiS_Private *SiS_Pr,PSIS_HW_INFO HwInfo)
+SiS_ResetSegmentRegisters(SiS_Private *SiS_Pr)
 {
    SiS_ResetSegmentReg(SiS_Pr);
    SiS_ResetSegmentRegOver(SiS_Pr);
@@ -364,8 +365,8 @@ SiS_GetColorDepth(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex)
 /*********************************************/
 
 static USHORT
-SiS_GetOffset(SiS_Private *SiS_Pr,USHORT ModeNo,USHORT ModeIdIndex,
-              USHORT RefreshRateTableIndex,PSIS_HW_INFO HwInfo)
+SiS_GetOffset(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
+              USHORT RefreshRateTableIndex)
 {
   USHORT xres, temp, colordepth, infoflag;
 
@@ -395,7 +396,7 @@ SiS_GetOffset(SiS_Private *SiS_Pr,USHORT ModeNo,USHORT ModeIdIndex,
 /*********************************************/
 
 static void
-SiS_SetSeqRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex, PSIS_HW_INFO HwInfo)
+SiS_SetSeqRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex)
 {
    UCHAR SRdata;
    int   i;
@@ -417,7 +418,7 @@ SiS_SetSeqRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex, PSIS_HW_INFO HwInfo)
 /*********************************************/
 
 static void
-SiS_SetMiscRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex, PSIS_HW_INFO HwInfo)
+SiS_SetMiscRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex)
 {
    UCHAR Miscdata;
 
@@ -430,8 +431,7 @@ SiS_SetMiscRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex, PSIS_HW_INFO HwInfo
 /*********************************************/
 
 static void
-SiS_SetCRTCRegs(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-                USHORT StandTableIndex)
+SiS_SetCRTCRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex)
 {
   UCHAR CRTCdata;
   USHORT i;
@@ -449,8 +449,7 @@ SiS_SetCRTCRegs(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
 /*********************************************/
 
 static void
-SiS_SetATTRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex,
-               PSIS_HW_INFO HwInfo)
+SiS_SetATTRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex)
 {
    UCHAR ARdata;
    USHORT i;
@@ -496,7 +495,7 @@ SiS_SetGRCRegs(SiS_Private *SiS_Pr, USHORT StandTableIndex)
 /*********************************************/
 
 static void
-SiS_ClearExt1Regs(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo, USHORT ModeNo)
+SiS_ClearExt1Regs(SiS_Private *SiS_Pr, USHORT ModeNo)
 {
   USHORT i;
 
@@ -512,8 +511,7 @@ SiS_ClearExt1Regs(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo, USHORT ModeNo)
 /*********************************************/
 
 static USHORT
-SiS_GetRatePtr(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
-               PSIS_HW_INFO HwInfo)
+SiS_GetRatePtr(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex)
 {
   USHORT RRTI,i,index,temp;
 
@@ -567,8 +565,7 @@ SiS_SetCRT1Sync(SiS_Private *SiS_Pr, USHORT RefreshRateTableIndex)
 
 static void
 SiS_SetCRT1CRTC(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
-                USHORT RefreshRateTableIndex,
-		PSIS_HW_INFO HwInfo)
+                USHORT RefreshRateTableIndex)
 {
   UCHAR  index;
   USHORT temp,i,j,modeflag;
@@ -638,8 +635,7 @@ SiS_SetCRT1CRTC(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
 
 static void
 SiS_SetCRT1Offset(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
-                  USHORT RefreshRateTableIndex,
-		  PSIS_HW_INFO HwInfo)
+                  USHORT RefreshRateTableIndex)
 {
    USHORT temp, DisplayUnit, infoflag;
 
@@ -649,8 +645,7 @@ SiS_SetCRT1Offset(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
       infoflag = SiS_Pr->SiS_RefIndex[RefreshRateTableIndex].Ext_InfoFlag;
    }
 
-   DisplayUnit = SiS_GetOffset(SiS_Pr,ModeNo,ModeIdIndex,
-                     	       RefreshRateTableIndex,HwInfo);
+   DisplayUnit = SiS_GetOffset(SiS_Pr,ModeNo,ModeIdIndex, RefreshRateTableIndex);
 
    temp = (DisplayUnit >> 8) & 0x0f;
    SiS_SetRegANDOR(SiS_Pr,SiS_Pr->SiS_P3c4,0x0E,0xF0,temp);
@@ -673,7 +668,7 @@ SiS_SetCRT1Offset(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
 
 static void
 SiS_SetCRT1VCLK(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
-                PSIS_HW_INFO HwInfo, USHORT RefreshRateTableIndex)
+                USHORT RefreshRateTableIndex)
 {
   USHORT  index=0, clka, clkb;
 
@@ -699,8 +694,7 @@ SiS_SetCRT1VCLK(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
 /*********************************************/
 
 static void
-SiS_SetCRT1FIFO_310(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
-                    PSIS_HW_INFO HwInfo)
+SiS_SetCRT1FIFO_310(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex)
 {
   USHORT modeflag;
 
@@ -727,8 +721,7 @@ SiS_SetCRT1FIFO_310(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
 /*********************************************/
 
 static void
-SiS_SetVCLKState(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-                 USHORT ModeNo, USHORT RefreshRateTableIndex,
+SiS_SetVCLKState(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT RefreshRateTableIndex,
                  USHORT ModeIdIndex)
 {
   USHORT data=0, VCLK=0, index=0;
@@ -756,8 +749,8 @@ SiS_SetVCLKState(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
 }
 
 static void
-SiS_SetCRT1ModeRegs(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-                    USHORT ModeNo,USHORT ModeIdIndex,USHORT RefreshRateTableIndex)
+SiS_SetCRT1ModeRegs(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
+			USHORT RefreshRateTableIndex)
 {
   USHORT data,infoflag=0,modeflag;
   USHORT resindex,xres;
@@ -823,7 +816,7 @@ SiS_SetCRT1ModeRegs(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
   }
   SiS_SetRegANDOR(SiS_Pr,SiS_Pr->SiS_P3c4,0x21,0x1F,data);
 
-  SiS_SetVCLKState(SiS_Pr, HwInfo, ModeNo, RefreshRateTableIndex, ModeIdIndex);
+  SiS_SetVCLKState(SiS_Pr, ModeNo, RefreshRateTableIndex, ModeIdIndex);
 
   SiS_SetReg(SiS_Pr,SiS_Pr->SiS_P3d4,0x52,0x2c);
 }
@@ -865,8 +858,7 @@ SiS_WriteDAC(SiS_Private *SiS_Pr, SISIOADDRESS DACData, USHORT shiftflag,
 }
 
 static void
-SiS_LoadDAC(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-            USHORT ModeNo, USHORT ModeIdIndex)
+SiS_LoadDAC(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex)
 {
    USHORT data,data2;
    USHORT time,i,j,k,m,n,o;
@@ -947,36 +939,35 @@ SiS_LoadDAC(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
 /*********************************************/
 
 static void
-SiS_SetCRT1Group(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,
-                 USHORT ModeNo, USHORT ModeIdIndex)
+SiS_SetCRT1Group(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex)
 {
   USHORT  StandTableIndex,RefreshRateTableIndex;
 
   SiS_Pr->SiS_CRT1Mode = ModeNo;
   StandTableIndex = 0;
 
-  SiS_ResetSegmentRegisters(SiS_Pr, HwInfo);
-  SiS_SetSeqRegs(SiS_Pr, StandTableIndex, HwInfo);
-  SiS_SetMiscRegs(SiS_Pr, StandTableIndex, HwInfo);
-  SiS_SetCRTCRegs(SiS_Pr, HwInfo, StandTableIndex);
-  SiS_SetATTRegs(SiS_Pr, StandTableIndex, HwInfo);
+  SiS_ResetSegmentRegisters(SiS_Pr);
+  SiS_SetSeqRegs(SiS_Pr, StandTableIndex);
+  SiS_SetMiscRegs(SiS_Pr, StandTableIndex);
+  SiS_SetCRTCRegs(SiS_Pr, StandTableIndex);
+  SiS_SetATTRegs(SiS_Pr, StandTableIndex);
   SiS_SetGRCRegs(SiS_Pr, StandTableIndex);
-  SiS_ClearExt1Regs(SiS_Pr, HwInfo, ModeNo);
+  SiS_ClearExt1Regs(SiS_Pr, ModeNo);
 
-  RefreshRateTableIndex = SiS_GetRatePtr(SiS_Pr, ModeNo, ModeIdIndex, HwInfo);
+  RefreshRateTableIndex = SiS_GetRatePtr(SiS_Pr, ModeNo, ModeIdIndex);
 
   if(RefreshRateTableIndex != 0xFFFF) {
      SiS_SetCRT1Sync(SiS_Pr, RefreshRateTableIndex);
-     SiS_SetCRT1CRTC(SiS_Pr, ModeNo, ModeIdIndex, RefreshRateTableIndex, HwInfo);
-     SiS_SetCRT1Offset(SiS_Pr, ModeNo, ModeIdIndex, RefreshRateTableIndex, HwInfo);
-     SiS_SetCRT1VCLK(SiS_Pr, ModeNo, ModeIdIndex, HwInfo, RefreshRateTableIndex);
+     SiS_SetCRT1CRTC(SiS_Pr, ModeNo, ModeIdIndex, RefreshRateTableIndex);
+     SiS_SetCRT1Offset(SiS_Pr, ModeNo, ModeIdIndex, RefreshRateTableIndex);
+     SiS_SetCRT1VCLK(SiS_Pr, ModeNo, ModeIdIndex, RefreshRateTableIndex);
   }
 
-  SiS_SetCRT1FIFO_310(SiS_Pr, ModeNo, ModeIdIndex, HwInfo);
+  SiS_SetCRT1FIFO_310(SiS_Pr, ModeNo, ModeIdIndex);
 
-  SiS_SetCRT1ModeRegs(SiS_Pr, HwInfo, ModeNo, ModeIdIndex, RefreshRateTableIndex);
+  SiS_SetCRT1ModeRegs(SiS_Pr, ModeNo, ModeIdIndex, RefreshRateTableIndex);
 
-  SiS_LoadDAC(SiS_Pr, HwInfo, ModeNo, ModeIdIndex);
+  SiS_LoadDAC(SiS_Pr, ModeNo, ModeIdIndex);
 
   SiS_DisplayOn(SiS_Pr);
 }
@@ -1000,22 +991,22 @@ SiS_SetPitch(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn)
 /*********************************************/
 
 BOOLEAN
-SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,ScrnInfoPtr pScrn,USHORT ModeNo, BOOLEAN dosetpitch)
+SiSUSBSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn, USHORT ModeNo, BOOLEAN dosetpitch)
 {
    USHORT  ModeIdIndex;
-   SISIOADDRESS BaseAddr = HwInfo->ulIOAddress;
+   SISIOADDRESS BaseAddr = SiS_Pr->IOAddress;
 
    if(SiS_Pr->UseCustomMode) {
       ModeNo = 0xfe;
    }
 
-   SiSUSB_InitPtr(SiS_Pr, HwInfo);
+   SiSUSB_InitPtr(SiS_Pr);
    SiSUSBRegInit(SiS_Pr, BaseAddr);
-   SiS_GetSysFlags(SiS_Pr, HwInfo);
+   SiS_GetSysFlags(SiS_Pr);
 
    SiS_SetReg(SiS_Pr,SiS_Pr->SiS_P3c4,0x05,0x86);
 
-   SiSInitPCIetc(SiS_Pr, HwInfo);
+   SiSInitPCIetc(SiS_Pr);
 
    if(!SiS_Pr->UseCustomMode) ModeNo &= 0x7f;
 
@@ -1030,7 +1021,7 @@ SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,ScrnInfoPtr pScrn,USHORT 
    SiS_Pr->SiS_SetFlag = LowModeTests;
 
    /* Set mode on CRT1 */
-   SiS_SetCRT1Group(SiS_Pr, HwInfo, ModeNo, ModeIdIndex);
+   SiS_SetCRT1Group(SiS_Pr, ModeNo, ModeIdIndex);
 
    SiS_HandleCRT1(SiS_Pr);
 
@@ -1056,7 +1047,7 @@ SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo,ScrnInfoPtr pScrn,USHORT 
 /*********************************************/
 
 BOOLEAN
-SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo, ScrnInfoPtr pScrn,
+SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn,
                DisplayModePtr mode, BOOLEAN IsCustom)
 {
    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
@@ -1082,7 +1073,7 @@ SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo, ScrnInfoPtr pScrn,
 
    }
 
-   return(SiSUSBSetMode(SiS_Pr, HwInfo, pScrn, ModeNo, TRUE));
+   return(SiSUSBSetMode(SiS_Pr, pScrn, ModeNo, TRUE));
 }
 
 /* Helper functions */
@@ -1191,7 +1182,7 @@ SiSUSB_MakeClockRegs(ScrnInfoPtr pScrn, int clock, UCHAR *p2b, UCHAR *p2c)
 }
 
 USHORT
-SiSUSB_CheckBuildCustomMode(ScrnInfoPtr pScrn, DisplayModePtr mode, int VBFlags)
+SiSUSB_CheckBuildCustomMode(ScrnInfoPtr pScrn, DisplayModePtr mode, unsigned int VBFlags)
 {
    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
    int depth = pSiSUSB->CurrentLayout.bitsPerPixel;
@@ -1296,7 +1287,7 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
 
    pSiSUSB->backupmodelist = NULL;
 
-   SiSUSB_InitPtr(pSiSUSB->SiS_Pr, &pSiSUSB->sishw_ext);
+   SiSUSB_InitPtr(pSiSUSB->SiS_Pr);
 
    i = 0;
    while(pSiSUSB->SiS_Pr->SiS_RefIndex[i].Ext_InfoFlag != 0xFFFF) {

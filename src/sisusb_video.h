@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_video.h,v 1.1 2005/04/21 21:35:54 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Xv driver for SiS 315 USB
  *
@@ -44,14 +44,14 @@ static void 	SISUSBQueryBestSize(ScrnInfoPtr, Bool, short, short, short,
 static int 	SISUSBQueryImageAttributes(ScrnInfoPtr,
     			int, UShort *, UShort *, int *, int *);
 static void 	SISUSBStopVideo(ScrnInfoPtr, pointer, Bool);
+void		SISUSBSetPortDefaults(ScrnInfoPtr pScrn, SISUSBPortPrivPtr pPriv);
 #ifdef SIS_ENABLEXV
 static int 	SISUSBPutImage( ScrnInfoPtr,
     			short, short, short, short, short, short, short, short,
     			int, UChar *, short, short, Bool, RegionPtr, pointer);
 static void 	SISUSBVideoTimerCallback(ScrnInfoPtr pScrn, Time now);
 static void     SISUSBInitOffscreenImages(ScreenPtr pScrn);
-FBLinearPtr     SISUSBAllocateOverlayMemory(ScrnInfoPtr pScrn, FBLinearPtr linear, int size);
-void		SISUSBSetPortDefaults(ScrnInfoPtr pScrn, SISUSBPortPrivPtr pPriv);
+static FBLinearPtr SISUSBAllocateOverlayMemory(ScrnInfoPtr pScrn, FBLinearPtr linear, int size);
 void		SiSUSBUpdateXvGamma(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv);
 #endif
 

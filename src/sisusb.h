@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb.h,v 1.7 2005/06/21 11:29:37 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Main global data and definitions
  *
@@ -35,8 +35,8 @@
 #define _SISUSB_H_
 
 #define SISUSBDRIVERVERSIONYEAR    5
-#define SISUSBDRIVERVERSIONMONTH   6
-#define SISUSBDRIVERVERSIONDAY     21
+#define SISUSBDRIVERVERSIONMONTH   7
+#define SISUSBDRIVERVERSIONDAY     9
 #define SISUSBDRIVERREVISION       1
 
 #define SISUSBDRIVERIVERSION ((SISUSBDRIVERVERSIONYEAR << 16) |  \
@@ -121,9 +121,6 @@
 #include "sisusb_types.h"
 #include "sisusb_struct.h"
 
-#undef SISHAVEDRMWRITE
-#undef SISNEWDRI
-
 /* Configurable stuff: ------------------------------------- */
 
 #define SIS_ARGB_CURSOR		/* Include code for color hardware cursors */
@@ -132,7 +129,7 @@
 
 #undef SIS_ENABLEXV		/* Enable/Disable Xv overlay support */
 
-#define XV_SD_DEPRECATED	/* Include deprecated Xv interface for SiSCtrl */
+#undef XV_SD_DEPRECATED		/* Include deprecated Xv interface for SiSCtrl */
 
 /* End of configurable stuff --------------------------------- */
 
@@ -146,12 +143,15 @@
 
 #undef SISGAMMARAMP
 #ifdef XORG_VERSION_CURRENT
-#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(6,9,0,0,0)
+#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(6,8,99,13,0)
 #define SISGAMMARAMP		/* Driver can set gamma ramp; requires additional symbols in xf86sym.h */
 #endif
 #endif
 
-#undef SIS315DRI		/* define this if dri is adapted for 315/330 series */
+#undef SIS_GLOBAL_ENABLEXV
+#if defined(XV_SD_DEPRECATED) || defined(SIS_ENABLEXV)
+#define SIS_GLOBAL_ENABLEXV
+#endif
 
 #ifdef TWDEBUG
 #define SISUSBVERBLEVEL 3
@@ -164,39 +164,39 @@
 #define SIS_VBFlagsVersion	1
 
 /* pSiSUSB->VBFlags - if anything is changed here, increase VBFlagsVersion! */
-#define CRT2_DEFAULT            0x00000001
-#define CRT2_LCD                0x00000002  /* Never change the order of the CRT2_XXX entries */
-#define CRT2_TV                 0x00000004
-#define CRT2_VGA                0x00000008
-#define TV_NTSC                 0x00000010
-#define TV_PAL                  0x00000020
-#define TV_HIVISION             0x00000040
-#define TV_YPBPR                0x00000080
-#define TV_AVIDEO               0x00000100
-#define TV_SVIDEO               0x00000200
-#define TV_SCART                0x00000400
-#define VB_CONEXANT		0x00000800   /* 661 series only */
-#define VB_TRUMPION		VB_CONEXANT  /* 300 series only */
-#define TV_PALM                 0x00001000
-#define TV_PALN                 0x00002000
-#define TV_NTSCJ		0x00001000
-#define VB_302ELV		0x00004000
-#define TV_CHSCART              0x00008000
-#define TV_CHYPBPR525I          0x00010000
-#define CRT1_VGA		0x00000000
+#define CRT2_DEFAULT		0x00000001
+#define CRT2_LCD		0x00000002  /* Never change the order of the CRT2_XXX entries */
+#define CRT2_TV			0x00000004
+#define CRT2_VGA		0x00000008
+#define TV_NTSC			0x00000010
+#define TV_PAL			0x00000020
+#define TV_HIVISION		0x00000040
+#define TV_YPBPR		0x00000080
+#define TV_AVIDEO		0x00000100
+#define TV_SVIDEO		0x00000200
+#define TV_SCART		0x00000400
+#define VB_CONEXANT		0x00000800	/* Definition deprecated (now VBFlags2) */
+#define VB_TRUMPION		VB_CONEXANT	/* Definition deprecated (now VBFlags2) */
+#define TV_PALM			0x00001000
+#define TV_PALN			0x00002000
+#define TV_NTSCJ		TV_PALM
+#define OLDVB_302ELV		0x00004000	/* Definition deprecated (now VBFlags2) */
+#define TV_CHSCART		0x00008000
+#define TV_CHYPBPR525I		0x00010000
+#define CRT1_VGA		0x00000000	/* ZERO - no mask! */
 #define CRT1_LCDA		0x00020000
-#define VGA2_CONNECTED          0x00040000
+#define VGA2_CONNECTED		0x00040000
 #define DISPTYPE_CRT1		0x00080000  	/* CRT1 connected and used */
-#define VB_301                  0x00100000	/* Video bridge type */
-#define VB_301B                 0x00200000
-#define VB_302B                 0x00400000
-#define VB_30xBDH		0x00800000      /* 30xB DH version (w/o LCD support) */
-#define VB_LVDS                 0x01000000
-#define VB_CHRONTEL             0x02000000
-#define VB_301LV                0x04000000
-#define VB_302LV                0x08000000
-#define VB_301C			0x10000000
-#define SINGLE_MODE             0x20000000   	/* CRT1 or CRT2; determined by DISPTYPE_CRTx */
+#define OLDVB_301		0x00100000	/* Definition deprecated (now VBFlags2) */
+#define OLDVB_301B		0x00200000	/* Definition deprecated (now VBFlags2) */
+#define OLDVB_302B		0x00400000	/* Definition deprecated (now VBFlags2) */
+#define OLDVB_30xBDH		0x00800000      /* Definition deprecated (now VBFlags2) */
+#define OLDVB_LVDS		0x01000000	/* Definition deprecated (now VBFlags2) */
+#define OLDVB_CHRONTEL		0x02000000	/* Definition deprecated (now VBFlags2) */
+#define OLDVB_301LV		0x04000000	/* Definition deprecated (now VBFlags2) */
+#define OLDVB_302LV		0x08000000	/* Definition deprecated (now VBFlags2) */
+#define OLDVB_301C		0x10000000	/* Definition deprecated (now VBFlags2) */
+#define SINGLE_MODE		0x20000000   	/* CRT1 or CRT2; determined by DISPTYPE_CRTx */
 #define MIRROR_MODE		0x40000000   	/* CRT1 + CRT2 identical (mirror mode) */
 #define DUALVIEW_MODE		0x80000000   	/* CRT1 + CRT2 independent (dual head mode) */
 
@@ -217,19 +217,6 @@
 #define TV_YPBPR169 		(TV_CHSCART | TV_CHYPBPR525I)
 #define TV_YPBPRAR              (TV_CHSCART | TV_CHYPBPR525I)
 
-#define VB_SISBRIDGE            (VB_301|VB_301B|VB_301C|VB_302B|VB_301LV|VB_302LV|VB_302ELV)
-#define VB_SISTVBRIDGE          (VB_301|VB_301B|VB_301C|VB_302B|VB_301LV|VB_302LV)
-#define VB_VIDEOBRIDGE		(VB_SISBRIDGE | VB_LVDS | VB_CHRONTEL | VB_CONEXANT)
-#define VB_SISLVDSBRIDGE        (VB_301LV|VB_302LV|VB_302ELV)
-#define VB_SISTMDSBRIDGE	(VB_301|VB_301B|VB_301C|VB_302B)
-#define VB_SISTMDSLCDABRIDGE	(VB_301C)
-#define VB_SISVGA2BRIDGE  	(VB_301|VB_301B|VB_301C|VB_302B)
-#define VB_SISLCDABRIDGE 	(VB_301C|VB_302B|VB_301LV|VB_302LV|VB_302ELV)
-#define VB_SISHIVISIONBRIDGE	(VB_301|VB_301B|VB_302B)
-#define VB_SISYPBPRBRIDGE	(VB_301C|VB_301LV|VB_302LV|VB_302ELV)
-#define VB_SISYPBPRARBRIDGE	(VB_301C)
-#define VB_SISTAP4SCALER	(VB_301C|VB_302ELV)
-
 #define DISPTYPE_DISP2		CRT2_ENABLE
 #define DISPTYPE_DISP1		DISPTYPE_CRT1
 #define VB_DISPMODE_SINGLE	SINGLE_MODE  	/* alias */
@@ -238,7 +225,48 @@
 #define DISPLAY_MODE            (SINGLE_MODE | MIRROR_MODE | DUALVIEW_MODE)
 
 /* pSiSUSB->VBFlags2 (static stuff only!) */
-#define VB_SISUMC		0x00000001
+#define VB2_SISUMC		0x00000001
+#define VB2_301			0x00000002	/* Video bridge type */
+#define VB2_301B		0x00000004
+#define VB2_301C		0x00000008
+#define VB2_307T		0x00000010
+#define VB2_302B		0x00000800
+#define VB2_301LV		0x00001000
+#define VB2_302LV		0x00002000
+#define VB2_302ELV		0x00004000
+#define VB2_307LV		0x00008000
+#define VB2_30xBDH		0x08000000      /* 30xB DH version (w/o LCD support) */
+#define VB2_CONEXANT		0x10000000	/* >=661 series only */
+#define VB2_TRUMPION		0x20000000	/* 300 series only */
+#define VB2_LVDS		0x40000000
+#define VB2_CHRONTEL		0x80000000
+
+#define VB2_SISLVDSBRIDGE	(VB2_301LV | VB2_302LV | VB2_302ELV | VB2_307LV)
+#define VB2_SISTMDSBRIDGE	(VB2_301   | VB2_301B  | VB2_301C   | VB2_302B | VB2_307T)
+#define VB2_SISBRIDGE		(VB2_SISLVDSBRIDGE | VB2_SISTMDSBRIDGE)
+
+#define VB2_SISTMDSLCDABRIDGE	(VB2_301C | VB2_307T)
+#define VB2_SISLCDABRIDGE	(VB2_SISTMDSLCDABRIDGE | VB2_301LV | VB2_302LV | VB2_302ELV | VB2_307LV)
+
+#define VB2_SISHIVISIONBRIDGE	(VB2_301  | VB2_301B | VB2_302B)
+#define VB2_SISYPBPRBRIDGE	(VB2_301C | VB2_307T | VB2_SISLVDSBRIDGE)
+#define VB2_SISYPBPRARBRIDGE	(VB2_301C | VB2_307T | VB2_307LV)
+#define VB2_SISTAP4SCALER	(VB2_301C | VB2_307T | VB2_302ELV | VB2_307LV)
+#define VB2_SISTVBRIDGE		(VB2_SISHIVISIONBRIDGE | VB2_SISYPBPRBRIDGE)
+
+#define VB2_SISVGA2BRIDGE	(VB2_301 | VB2_301B | VB2_301C | VB2_302B | VB2_307T)
+
+#define VB2_VIDEOBRIDGE		(VB2_SISBRIDGE | VB2_LVDS | VB2_CHRONTEL | VB2_CONEXANT)
+
+#define VB2_30xB		(VB2_301B  | VB2_301C   | VB2_302B  | VB2_307T)
+#define VB2_30xBLV		(VB2_30xB  | VB2_SISLVDSBRIDGE)
+#define VB2_30xC		(VB2_301C  | VB2_307T)
+#define VB2_30xCLV		(VB2_301C  | VB2_307T   | VB2_302ELV| VB2_307LV)
+#define VB2_SISEMIBRIDGE	(VB2_302LV | VB2_302ELV | VB2_307LV)
+#define VB2_LCD162MHZBRIDGE	(VB2_301C  | VB2_307T)
+#define VB2_LCDOVER1280BRIDGE	(VB2_301C  | VB2_307T   | VB2_302LV | VB2_302ELV | VB2_307LV)
+#define VB2_LCDOVER1600BRIDGE	(VB2_307T  | VB2_307LV)
+#define VB2_RAMDAC202MHZBRIDGE	(VB2_301C  | VB2_307T)
 
 /* pSiSUSB->VBLCDFlags */
 #define VB_LCD_320x480		0x00000001	/* DSTN/FSTN for 550 */
@@ -260,6 +288,11 @@
 #define VB_LCD_1280x800		0x00010000
 #define VB_LCD_1680x1050	0x00020000
 #define VB_LCD_1280x720         0x00040000
+#define VB_LCD_320x240		0x00080000
+#define VB_LCD_856x480		0x00100000
+#define VB_LCD_1280x854		0x00200000
+#define VB_LCD_1920x1200	0x00400000
+#define VB_LCD_UNKNOWN		0x10000000
 #define VB_LCD_BARCO1366        0x20000000
 #define VB_LCD_CUSTOM  		0x40000000
 #define VB_LCD_EXPANDING	0x80000000
@@ -277,8 +310,8 @@
 #define MISC_CRT1OVERLAYGAMMA	0x00000004  /* Current display mode supports overlay gamma corr on CRT1 */
 #define MISC_TVNTSC1024		0x00000008  /* Current display mode is TV NTSC/PALM/YPBPR525I 1024x768  */
 #define MISC_CRT2OVERLAY	0x00000010  /* Current display mode supports overlay (CRT2) */
-
-#define HW_DEVICE_EXTENSION	SIS_HW_INFO
+#define MISC_SIS760ONEOVERLAY	0x00000020  /* SiS760/761: Only one overlay available currently */
+#define MISC_STNMODE		0x00000040  /* SiS550: xSTN active */
 
 #ifdef  DEBUG
 #define PDEBUG(p)       p
@@ -325,12 +358,16 @@ typedef unsigned char  UChar;
 #define SiSCF_IsM66x        (SiSCF_IsM661 | SiSCF_IsM741 | SiSCF_IsM760 | SiSCF_IsM661M)
 #define SiSCF_Is315USB      0x00001000  /* USB2VGA dongle */
 #define SiSCF_Is315E	    0x00002000  /* 315E */
+#define SiSCF_IsXGIV3	    SiSCF_Is651 /* Volari V3(XT)  (If neither XGI... set, is V8) */
+#define SiSCF_IsXGIV5	    SiSCF_IsM650/* Volari V5 */
+#define SiSCF_IsXGIDUO	    SiSCF_IsM652/* Volari Duo */
 /* ... */
 #define SiSCF_315Core       0x00010000  /* 3D: Real 315 */
 #define SiSCF_Real256ECore  0x00020000  /* 3D: Similar to 315 core, no T&L? (65x, 661, 740, 741) */
 #define SiSCF_XabreCore     0x00040000  /* 3D: Real Xabre */
 #define SiSCF_Ultra256Core  0x00080000  /* 3D: aka "Mirage 2"; similar to Xabre, no T&L?, no P:Shader? (760) */
 #define SiSCF_MMIOPalette   0x00100000  /* HW supports MMIO palette writing/reading */
+#define SiSCF_IsXGI	    0x00200000  /* Is XGI chip (Z7, V3, V5, V8) */
 #define SiSCF_UseLCDA       0x01000000
 #define SiSCF_760LFB        0x08000000  /* 760: LFB active (if not set, UMA only) */
 #define SiSCF_760UMA        0x10000000  /* 760: UMA active (if not set, LFB only) */
@@ -394,6 +431,8 @@ typedef unsigned char  UChar;
 #define SiS_SD2_NEEDUSESSE     0x00020000   /* Need "UseSSE" option to use SSE (otherwise auto) */
 #define SiS_SD2_NODDCSUPPORT   0x00040000   /* No hardware DDC support (USB) */
 #define SiS_SD2_SUPPORTXVDEINT 0x00080000   /* Xv deinterlacing supported (n/a) */
+#define SiS_SD2_ISXGI	       0x00100000   /* Is XGI chip */
+#define SiS_SD2_USEVBFLAGS2    0x00200000   /* Use VBFlags2 for bridge ID */
 /* ... */
 #define SiS_SD2_NOOVERLAY      0x80000000   /* No video overlay */
 
@@ -468,12 +507,12 @@ typedef struct {
 typedef struct {
     ScrnInfoPtr		pScrn;
     EntityInfoPtr	pEnt;
-    int			Chipset;
+    int			Chipset;	/* PCI ID (pseudo for USB) */
+    int			ChipType;	/* From sisusb_types.h */
     int			ChipRev;
 
     int			VGAEngine;      /* see above */
     int	                hasTwoOverlays; /* Chipset supports two video overlays? */
-    HW_DEVICE_EXTENSION sishw_ext;      /* For new mode switching code */
     SiS_Private 	*SiS_Pr;        /* For new mode switching code */
     int			DSTN; 		/* For 550 FSTN/DSTN; set by option, no detection */
     ULong       	FbAddress;      /* VRAM physical address (in DHM: for each Fb!) */
@@ -503,10 +542,10 @@ typedef struct {
     UChar		oldCR32, oldCR36, oldCR37;
     UChar		myCR32, myCR36, myCR37, myCR63;
     UChar		newCR32;
-    ULong		VBFlags;		/* Video bridge configuration */
-    ULong		VBFlags2;		/* Video bridge configuration 2 (static flags only) */
-    ULong       	VBFlags_backup;         /* Backup for SlaveMode-modes */
-    ULong		VBLCDFlags;             /* Moved LCD panel size bits here */
+    unsigned int	VBFlags;		/* Video bridge configuration */
+    unsigned int	VBFlags2;		/* Video bridge configuration 2 (static flags only) */
+    unsigned int       	VBFlags_backup;         /* Backup for SlaveMode-modes */
+    unsigned int	VBLCDFlags;             /* Moved LCD panel size bits here */
     short		scrnOffset;		/* Screen pitch (data) */
     short		scrnPitch;		/* Screen pitch (display; regarding interlace) */
     unsigned short	DstColor;
@@ -618,6 +657,7 @@ typedef struct {
     Bool		HaveCustomModes;
     Bool		IsCustom;
     DisplayModePtr	backupmodelist;
+#ifdef SIS_GLOBAL_ENABLEXV
     Atom		xvBrightness, xvContrast, xvColorKey, xvHue, xvSaturation;
     Atom		xvAutopaintColorKey, xvSetDefaults, xvSwitchCRT;
     Atom		xvDisableGfx, xvDisableGfxLR, xvTVXPosition, xvTVYPosition;
@@ -633,6 +673,7 @@ typedef struct {
     Atom		xv_BRRC2, xv_BRGC2, xv_BRBC2, xv_PBRC2, xv_PBGC2, xv_PBBC2;
 #ifdef TWDEBUG
     Atom		xv_STR;
+#endif
 #endif
     int			xv_sisdirectunlocked;
     ULong		xv_sd_result;
@@ -709,7 +750,9 @@ extern Bool  SiSUSBAccelInit(ScreenPtr pScreen);
 #if 0
 extern void  SiSUSBSync(ScrnInfoPtr pScrn);
 #endif
+#ifdef SIS_GLOBAL_ENABLEXV
 extern void  SISUSBInitVideo(ScreenPtr pScreen);
+#endif
 extern Bool  SiSUSBFBInit(ScreenPtr pScreen);
 
 extern void   SiSUSBMemCopyToVideoRam(SISUSBPtr pSiSUSB, UChar *to, UChar *from, int size);

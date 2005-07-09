@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_driver.h,v 1.5 2005/06/21 11:29:37 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Global data and definitions
  *
@@ -109,10 +109,10 @@ UChar		SISUSBSearchCRT1Rate(ScrnInfoPtr pScrn, DisplayModePtr mode);
 static void	SISUSBWaitVBRetrace(ScrnInfoPtr pScrn);
 void		SISUSBWaitRetraceCRT1(ScrnInfoPtr pScrn);
 static UShort	SiSUSB_CheckModeCRT1(ScrnInfoPtr pScrn, DisplayModePtr mode,
-				 ULong VBFlags, Bool hcm);
+				 unsigned int VBFlags, Bool hcm);
 
 Bool		SiSUSBBridgeIsInSlaveMode(ScrnInfoPtr pScrn);
-UShort		SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, ULong VBFlags);
+UShort		SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, unsigned int VBFlags);
 UChar		SiSUSB_GetSetBIOSScratch(ScrnInfoPtr pScrn, UShort offset, UChar value);
 #ifdef DEBUG
 static void	SiSUSBDumpModeInfo(ScrnInfoPtr pScrn, DisplayModePtr mode);
@@ -143,16 +143,16 @@ extern void	SiSUSBCtrlExtInit(ScrnInfoPtr pScrn);
 extern void	SiSUSBCtrlExtUnregister(SISUSBPtr pSiSUSB, int index);
 
 /* init.c ----- (use its data types!) */
-extern USHORT   SiSUSB_GetModeID(int VGAEngine, ULONG VBFlags, int HDisplay, int VDisplay,
-				  int Depth, BOOLEAN FSTN, int LCDwith, int LCDheight);
+extern USHORT   SiSUSB_GetModeID(int VGAEngine, unsigned int VBFlags, int HDisplay, int VDisplay,
+					int Depth, BOOLEAN FSTN, int LCDwith, int LCDheight);
 extern int	SiSUSBTranslateToOldMode(int modenumber);
-extern BOOLEAN	SiSUSBDetermineROMLayout661(SiS_Private *SiS_Pr, PSIS_HW_INFO HwInfo);
-extern BOOLEAN	SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwDeviceExtension,
-                               ScrnInfoPtr pScrn, DisplayModePtr mode, BOOLEAN IsCustom);
-extern BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, PSIS_HW_INFO HwDeviceExtension,
-                           ScrnInfoPtr pScrn, USHORT ModeNo, BOOLEAN dosetpitch);
+extern BOOLEAN	SiSUSBDetermineROMLayout661(SiS_Private *SiS_Pr);
+extern BOOLEAN	SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn, DisplayModePtr mode,
+					BOOLEAN IsCustom);
+extern BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn, USHORT ModeNo,
+					BOOLEAN dosetpitch);
 extern DisplayModePtr SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes,
-					      BOOLEAN isfordvi, BOOLEAN fakecrt2modes);
+					BOOLEAN isfordvi, BOOLEAN fakecrt2modes);
 /* End of init.c, init301.c ----- */
 
 

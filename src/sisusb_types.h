@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_types.h,v 1.3 2005/04/21 21:35:54 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * General type definitions for universal mode switching modules
  *
@@ -128,19 +128,10 @@ typedef enum _SIS_CHIP_TYPE {
     SIS_340 = 55,
     SIS_341,
     SIS_342,
+    XGI_20  = 75,
+    XGI_40,
     MAX_SIS_CHIP
 } SIS_CHIP_TYPE;
-
-#ifndef SIS_HW_INFO
-typedef struct _SIS_HW_INFO  SIS_HW_INFO, *PSIS_HW_INFO;
-
-struct _SIS_HW_INFO
-{
-    SISIOADDRESS ulIOAddress;	/* base I/O address of VGA ports (0x3B0; relocated) */
-    UCHAR  jChipType;		/* defined in the enum "SIS_CHIP_TYPE" above */
-    UCHAR  jChipRevision;
-};
-#endif
 
 /* Addtional IOCTLs for communication sisfb <> X driver        */
 /* If changing this, sisfb.h must also be changed (for sisfb) */

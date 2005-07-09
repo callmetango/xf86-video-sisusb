@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_video.c,v 1.5 2005/04/22 23:42:43 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Xv driver for SiS 315 USB
  *
@@ -37,6 +37,9 @@
  */
 
 #include "sisusb.h"
+
+#ifdef SIS_GLOBAL_ENABLEXV
+
 #include "xf86fbman.h"
 #include "regionstr.h"
 
@@ -588,6 +591,7 @@ RegionsEqual(RegionPtr A, RegionPtr B)
 #endif
 #endif
 
+#if 0
 void
 SISUSBUpdateVideoParms(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
 {
@@ -597,6 +601,7 @@ SISUSBUpdateVideoParms(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
 #endif
   set_maxencoding(pSiSUSB, pPriv);
 }
+#endif
 
 static int
 SISUSBSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute,
@@ -796,8 +801,8 @@ calc_scale_factor(SISUSBOverlayPtr pOverlay, ScrnInfoPtr pScrn,
   if(modeflags & V_DBLSCAN) {
      dstH = origdstH << 1;
      flag = 0;
-     if((pSiSUSB->sishw_ext.jChipType >= SIS_315H) &&
-	(pSiSUSB->sishw_ext.jChipType <= SIS_550)) {
+     if((pSiSUSB->ChipType >= SIS_315H) &&
+	(pSiSUSB->ChipType <= SIS_550)) {
 	dstW <<= 1;
      }
   }
@@ -1453,7 +1458,7 @@ SISUSBDisplayVideo(ScrnInfoPtr pScrn, SISUSBPortPrivPtr pPriv)
 #endif
 
 #ifdef SIS_ENABLEXV
-FBLinearPtr
+static FBLinearPtr
 SISUSBAllocateOverlayMemory(
   ScrnInfoPtr pScrn,
   FBLinearPtr linear,
@@ -2036,3 +2041,9 @@ SISUSBVideoTimerCallback(ScrnInfoPtr pScrn, Time now)
     pSiSUSB->VideoTimerCallback = (setcallback) ? SISUSBVideoTimerCallback : NULL;
 }
 #endif
+
+#else	/* SIS_GLOBAL_ENABLEXV */
+
+    int i;
+
+#endif /* SIS_GLOBAL_ENABLEXV */

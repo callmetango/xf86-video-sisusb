@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_vga.c,v 1.2 2005/04/22 23:42:43 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * Mode setup and basic video bridge detection
  *
@@ -88,10 +88,6 @@ SISUSB300Init(ScrnInfoPtr pScrn, DisplayModePtr mode)
     /* Enable PCI LINEAR ADDRESSING (0x80), MMIO (0x01), PCI_IO (0x20) */
     pReg->sisRegs3C4[0x20] = 0xA1;
 
-    /* Now initialize TurboQueue. TB is always located at the very top of
-     * the videoRAM (notably NOT the x framebuffer memory, which can/should
-     * be limited by MaxXFbMem when using DRI). Also, enable the accelerators.
-     */
     if(!pSiSUSB->NoAccel) {
         pReg->sisRegs3C4[0x1E] |= 0x42;  /* Enable 2D accelerator */
 	pReg->sisRegs3C4[0x1E] |= 0x18;  /* Enable 3D accelerator */

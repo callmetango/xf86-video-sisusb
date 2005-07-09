@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_driver.c,v 1.9 2005/06/25 21:16:56 ajax Exp $ */
+/* $XdotOrg$ */
 /*
  * SiSUSB driver main code
  *
@@ -68,7 +68,10 @@ static int pix24bpp = 0;
  * an upper-case version of the driver name.
  */
 
-_X_EXPORT DriverRec SISUSB = {
+#ifdef _X_EXPORT
+_X_EXPORT
+#endif
+DriverRec SISUSB = {
     SISUSB_CURRENT_VERSION,
     SISUSB_DRIVER_NAME,
     SISUSBIdentify,
@@ -127,7 +130,10 @@ static XF86ModuleVersionInfo sisVersRec =
     {0,0,0,0}
 };
 
-_X_EXPORT XF86ModuleData sisusbModuleData = { &sisVersRec, sisusbSetup, NULL };
+#ifdef _X_EXPORT
+_X_EXPORT
+#endif
+XF86ModuleData sisusbModuleData = { &sisVersRec, sisusbSetup, NULL };
 
 pointer
 sisusbSetup(pointer module, pointer opts, int *errmaj, int *errmin)
@@ -576,7 +582,7 @@ SISUSBDisplayPowerManagementSet(ScrnInfoPtr pScrn, int PowerManagementMode, int 
 
 }
 
-#ifdef SISUSBGAMMARAMP
+#ifdef SISGAMMARAMP
 static void
 SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
 {
@@ -665,19 +671,6 @@ SiSUSBMakeOwnModeList(ScrnInfoPtr pScrn, Bool acceptcustommodes, Bool includelcd
 	  } else {
 	     pScrn->monitor->Modes = mymodes;
 	  }
-#if 0
-	  tempmode = pScrn->monitor->Modes;
-	  if(tempmode) *havecustommodes = TRUE;
-	  pScrn->monitor->Modes = mymodes;
-	  while(mymodes) {
-	     if(!mymodes->next) break;
-	     else mymodes = mymodes->next;
-	  }
-	  mymodes->next = tempmode;
-	  if(tempmode) {
-	     tempmode->prev = mymodes;
-	  }
-#endif
        }
        return TRUE;
     } else
@@ -700,7 +693,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     MessageType from;
     UChar srlockReg, crlockReg;
     unsigned int i;
-    int pix24flags, temp;
+    int pix24flags;
     ClockRangePtr clockRanges;
 
     if(flags & PROBE_DETECT) {
@@ -818,9 +811,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     /* Set Chipset type and revision */
     pSiSUSB->Chipset = USB_CHIP_SIS315;
     pSiSUSB->ChipRev = 0;
-    pSiSUSB->sishw_ext.jChipRevision = pSiSUSB->ChipRev;
-
-    /* Reset some entries */
+    pSiSUSB->ChipType = SIS_315PRO;
 
     /* Always do a ValidMode() inside Switchmode() */
     pSiSUSB->skipswitchcheck = FALSE;
@@ -832,7 +823,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     pSiSUSB->NeedFlush = FALSE;
 
     pSiSUSB->VGAEngine = SIS_315_VGA;
-    pSiSUSB->sishw_ext.jChipType = SIS_315PRO;
     pSiSUSB->ChipFlags |= (SiSCF_Is315USB | SiSCF_315Core | SiSCF_MMIOPalette);
     pSiSUSB->SiS_SD_Flags |= SiS_SD_IS315SERIES;
     pSiSUSB->SiS_SD2_Flags |= SiS_SD2_SUPPORTXVHUESAT;
@@ -922,8 +912,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
     /*
      * The first thing we should figure out is the depth, bpp, etc.
-     * Set SupportConvert... flags since we use the fb layer which
-     * supports this conversion. (24to32 seems not implemented though)
      * Additionally, determine the size of the HWCursor memory area.
      */
     pSiSUSB->CursorSize = 16384;
@@ -944,27 +932,26 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     pSiSUSB->ForceCursorOff = FALSE;
 
     /* Allocate SiS_Private (for mode switching code) and initialize it */
-    pSiSUSB->SiS_Pr = NULL;
 
-    if(!pSiSUSB->SiS_Pr) {
-       if(!(pSiSUSB->SiS_Pr = xnfcalloc(sizeof(SiS_Private), 1))) {
-          SISUSBErrorLog(pScrn, "Could not allocate memory for SiS_Pr structure\n");
-	  SISUSBFreeRec(pScrn);
-          return FALSE;
-       }
-       memset(pSiSUSB->SiS_Pr, 0, sizeof(SiS_Private));
-
-       pSiSUSB->SiS_Pr->CRT1UsesCustomMode = FALSE;
-       pSiSUSB->SiS_Pr->SiS_MyCR63 = pSiSUSB->myCR63;
-       pSiSUSB->SiS_Pr->pSiSUSB = (void *)pSiSUSB;
+    if(!(pSiSUSB->SiS_Pr = xnfcalloc(sizeof(SiS_Private), 1))) {
+       SISUSBErrorLog(pScrn, "Could not allocate memory for SiS_Pr structure\n");
+       SISUSBFreeRec(pScrn);
+       return FALSE;
     }
+    memset(pSiSUSB->SiS_Pr, 0, sizeof(SiS_Private));
+
+    pSiSUSB->SiS_Pr->ChipType = pSiSUSB->ChipType;
+    pSiSUSB->SiS_Pr->ChipRevision = pSiSUSB->ChipRev;
+    pSiSUSB->SiS_Pr->CRT1UsesCustomMode = FALSE;
+    pSiSUSB->SiS_Pr->SiS_MyCR63 = pSiSUSB->myCR63;
+    pSiSUSB->SiS_Pr->pSiSUSB = (void *)pSiSUSB;
 
     /* Get our relocated IO registers */
     pSiSUSB->RelIO = (SISIOADDRESS)pSiSUSB->sisusbioportbase;
-    pSiSUSB->sishw_ext.ulIOAddress = (SISIOADDRESS)(pSiSUSB->RelIO + 0x30);
+    pSiSUSB->SiS_Pr->IOAddress = (SISIOADDRESS)(pSiSUSB->RelIO + 0x30);
 
     /* Initialize SiS Port Reg definitions for externally used
-     * init.c/init301.c functions.
+     * sisusb_init.c routines.
      */
     SiSUSBRegInit(pSiSUSB->SiS_Pr, pSiSUSB->RelIO + 0x30);
 
@@ -975,22 +962,17 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
     /* Check that the returned depth is one we support */
-    temp = 0;
     switch(pScrn->depth) {
        case 8:
        case 16:
        case 24:
           break;
        default:
-	  temp = 1;
-    }
-
-    if(temp) {
-       SISUSBErrorLog(pScrn,
-            "Given color depth (%d) is not supported by this driver/chipset\n",
-            pScrn->depth);
-       SISUSBFreeRec(pScrn);
-       return FALSE;
+	  SISUSBErrorLog(pScrn,
+		"Given color depth (%d) is not supported by this driver/chipset\n",
+		pScrn->depth);
+	  SISUSBFreeRec(pScrn);
+	  return FALSE;
     }
 
     xf86PrintDepthBpp(pScrn);
@@ -1022,11 +1004,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
         } else {
            Bool ret = FALSE;
            switch(pScrn->depth) {
-	   case 15:
-	      if((pScrn->weight.red != 5) ||
-	         (pScrn->weight.green != 5) ||
-		 (pScrn->weight.blue != 5)) ret = TRUE;
-	      break;
 	   case 16:
 	      if((pScrn->weight.red != 5) ||
 	         (pScrn->weight.green != 6) ||
@@ -1157,6 +1134,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
     /* Setup SD flags */
     pSiSUSB->SiS_SD_Flags |= SiS_SD_ADDLSUPFLAG;
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_USEVBFLAGS2;
 
     /* Backup detected CRT2 devices */
     SISUSBSaveDetectedDevices(pScrn);
@@ -1169,12 +1147,13 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     }
 
        xf86DrvMsg(pScrn->scrnIndex, pSiSUSB->CRT1gammaGiven ? X_CONFIG : X_INFO,
-       	     "CRT1 gamma correction is %s\n",
-             pSiSUSB->CRT1gamma ? "enabled" : "disabled");
+	     "Gamma correction is %s\n",
+	     pSiSUSB->CRT1gamma ? "enabled" : "disabled");
 
+#ifdef SIS_GLOBAL_ENABLEXV
        if(!(pSiSUSB->NoXvideo)) {
           xf86DrvMsg(pScrn->scrnIndex, pSiSUSB->XvGammaGiven ? X_CONFIG : X_INFO,
-       		"Separate Xv gamma correction for CRT1 is %s\n",
+		"Separate Xv gamma correction is %s\n",
 		pSiSUSB->XvGamma ? "enabled" : "disabled");
 	  if(pSiSUSB->XvGamma) {
 	     xf86DrvMsg(pScrn->scrnIndex, pSiSUSB->XvGammaGiven ? X_CONFIG : X_INFO,
@@ -1184,10 +1163,13 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 		(float)((float)pSiSUSB->XvGammaBlue / 1000));
 	     if(!pSiSUSB->CRT1gamma) {
 	        xf86DrvMsg(pScrn->scrnIndex, X_INFO,
-		   "Xv gamma correction requires CRT1 gamma correction enabled\n");
+		   "Xv gamma correction requires gamma correction enabled\n");
 	     }
 	  }
        }
+#else
+       pSiSUSB->XvGamma = FALSE;
+#endif
 
     pSiSUSB->CRT1changed = FALSE;
     pSiSUSB->newCR32 = pSiSUSB->postVBCR32;
@@ -1490,8 +1472,7 @@ SISUSBModeInit(ScrnInfoPtr pScrn, DisplayModePtr mode)
 
     SiSUSBPreSetMode(pScrn, mode, SIS_MODE_SIMU);
 
-    if(!SiSUSBBIOSSetMode(pSiSUSB->SiS_Pr, &pSiSUSB->sishw_ext, pScrn,
-		                   mode, pSiSUSB->IsCustom)) {
+    if(!SiSUSBBIOSSetMode(pSiSUSB->SiS_Pr, pScrn, mode, pSiSUSB->IsCustom)) {
        SISUSBErrorLog(pScrn, "SiSUSBBIOSSetMode() failed\n");
        return FALSE;
     }
@@ -1556,7 +1537,7 @@ SISUSBRestore(ScrnInfoPtr pScrn)
 
 	   pSiSUSB->SiS_Pr->UseCustomMode = FALSE;
 	   pSiSUSB->SiS_Pr->CRT1UsesCustomMode = FALSE;
-	   SiSUSBSetMode(pSiSUSB->SiS_Pr, &pSiSUSB->sishw_ext, pScrn, mymode, FALSE);
+	   SiSUSBSetMode(pSiSUSB->SiS_Pr, pScrn, mymode, FALSE);
 
 	   SiSUSB_GetSetModeID(pScrn, pSiSUSB->OldMode); /* NOT mymode! */
 
@@ -1572,7 +1553,7 @@ SISUSBRestore(ScrnInfoPtr pScrn)
 
     } else {
 
-       (*pSiSUSB->SiSRestore)(pScrn, sisReg);
+	   (*pSiSUSB->SiSRestore)(pScrn, sisReg);
 
     }
 
@@ -1695,9 +1676,9 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	  /* What if CR34 is different from the BIOS scratch byte? */
 	  if(pSiSUSB->OldMode != myoldmode) {
 	     /* If no bridge output is active, trust the BIOS scratch byte */
-	     if( (!(pSiSUSB->VBFlags & VB_VIDEOBRIDGE)) ||
-	         (pSiSUSB->OldMode == 0)                ||
-	         (!cr31 && !cr30)                    ||
+	     if( (!(pSiSUSB->VBFlags2 & VB2_VIDEOBRIDGE)) ||
+	         (pSiSUSB->OldMode == 0)                  ||
+	         (!cr31 && !cr30)                         ||
 		 (cr31 & 0x20) ) {
 		pSiSUSB->OldMode = myoldmode;
  	     }
@@ -1752,7 +1733,7 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
      * support TrueColor and not DirectColor.
      */
     if(!miSetVisualTypes(pScrn->depth,
-    			 (pScrn->bitsPerPixel > 8) ?
+			 (pScrn->bitsPerPixel > 8) ?
 			 	TrueColorMask : miGetDefaultVisualMask(pScrn->depth),
 			 pScrn->rgbBits, pScrn->defaultVisual)) {
        SISUSBSaveScreen(pScreen, SCREEN_SAVER_OFF);
@@ -1923,11 +1904,14 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pScrn->fbOffset = 0;
 
     pSiSUSB->ResetXv = pSiSUSB->ResetXvGamma = NULL;
+    pSiSUSB->xv_sisdirectunlocked = 0;
 
+#ifdef SIS_GLOBAL_ENABLEXV
 #if (XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,0,0)) || (defined(XvExtension))
     if(!pSiSUSB->NoXvideo) {
        SISUSBInitVideo(pScreen);
     }
+#endif
 #endif
 
     /* Wrap some funcs and setup remaining SD flags */
@@ -2408,7 +2392,7 @@ void SiSUSBPreSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode, int viewmode)
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     UChar  CR30, CR31, CR33;
     int    crt1rateindex = 0;
-    ULong  vbflag = pSiSUSB->VBFlags;
+    unsigned int vbflag = pSiSUSB->VBFlags;
     Bool   hcm = pSiSUSB->HaveCustomModes;
     DisplayModePtr mymode = mode;
 
@@ -2539,7 +2523,7 @@ SiSUSBBridgeIsInSlaveMode(ScrnInfoPtr pScrn)
 }
 
 UShort
-SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, ULong VBFlags)
+SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, unsigned int VBFlags)
 {
    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
    UShort i = (pSiSUSB->CurrentLayout.bitsPerPixel+7)/8 - 1;
@@ -2549,7 +2533,7 @@ SiSUSB_GetModeNumber(ScrnInfoPtr pScrn, DisplayModePtr mode, ULong VBFlags)
 }
 
 static UShort
-SiSUSB_CheckModeCRT1(ScrnInfoPtr pScrn, DisplayModePtr mode, ULong VBFlags, Bool havecustommodes)
+SiSUSB_CheckModeCRT1(ScrnInfoPtr pScrn, DisplayModePtr mode, unsigned int VBFlags, Bool havecustommodes)
 {
    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
    UShort i = (pSiSUSB->CurrentLayout.bitsPerPixel+7)/8 - 1;

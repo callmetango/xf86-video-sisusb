@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_opt.c,v 1.2 2005/04/22 23:42:43 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * SiSUSB driver option evaluation
  *
@@ -67,17 +67,20 @@ typedef enum {
 
 static const OptionInfoRec SISUSBOptions[] = {
     { OPTION_DISCONNTIMEOUT,           	"DisconnectTimeout",      OPTV_INTEGER,   {0}, FALSE },
+#if 0
     { OPTION_NOACCEL,           	"NoAccel",                OPTV_BOOLEAN,   {0}, FALSE },
+#endif
     { OPTION_ENABLESISCTRL,		"EnableSiSCtrl",   	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_SW_CURSOR,         	"SWCursor",               OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_HW_CURSOR,         	"HWCursor",               OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_USERGBCURSOR, 		"UseColorHWCursor",	  OPTV_BOOLEAN,   {0}, FALSE },
-    { OPTION_NOXVIDEO,          	"NoXvideo",               OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_NOINTERNALMODES,   	"NoInternalModes",        OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_RESTOREBYSET,		"RestoreBySetMode", 	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_CRT1GAMMA,			"CRT1Gamma", 	  	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_STOREDBRI,			"GammaBrightness",  	  OPTV_STRING,    {0}, FALSE },
     { OPTION_STOREDBRI,			"StoredGammaBrightness",  OPTV_STRING,    {0}, FALSE },
+#ifdef SIS_GLOBAL_ENABLEXV
+    { OPTION_NOXVIDEO,          	"NoXvideo",               OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_XVGAMMA,			"XvGamma", 	  	  OPTV_STRING,    {0}, FALSE },
     { OPTION_XVDEFCONTRAST,		"XvDefaultContrast", 	  OPTV_INTEGER,   {0}, FALSE },
     { OPTION_XVDEFBRIGHTNESS,		"XvDefaultBrightness", 	  OPTV_INTEGER,   {0}, FALSE },
@@ -91,6 +94,7 @@ static const OptionInfoRec SISUSBOptions[] = {
     { OPTION_XVINSIDECHROMAKEY,		"XvInsideChromaKey",      OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_XVYUVCHROMAKEY,		"XvYUVChromaKey",         OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_XVDISABLECOLORKEY,		"XvDisableColorKey",      OPTV_BOOLEAN,   {0}, FALSE },
+#endif
     { -1,                       	NULL,                     OPTV_NONE,      {0}, FALSE }
 };
 
@@ -106,6 +110,7 @@ SiSUSB_FIFT(const OptionInfoRec *options, int token)
     return 0; /* Should not happen */
 }
 
+#ifdef SIS_GLOBAL_ENABLEXV
 static void
 SiSUSB_PrintIlRange(ScrnInfoPtr pScrn, int token, int min, int max, UChar showhex)
 {
@@ -137,6 +142,7 @@ SiSUSB_StrIsBoolOn(char *strptr)
         (!xf86NameCmp(strptr,"1")) ) return TRUE;
     return FALSE;
 }
+#endif
 
 static Bool
 SiSUSB_EvalOneOrThreeFloats(ScrnInfoPtr pScrn, int token, const char *myerror,
@@ -177,7 +183,9 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     int         ival;
     static const char *disabledstr= "disabled";
     static const char *enabledstr = "enabled";
+#ifdef SIS_GLOBAL_ENABLEXV
     static const char *gammaopt   = "%s expects either a boolean, or 1 or 3 real numbers (0.1 - 10.0)\n";
+#endif
     static const char *briopt     = "%s expects 1 or 3 real numbers (0.1 - 10.0)\n";
     Bool        val;
 
@@ -195,18 +203,22 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
 
 #ifdef SISVRAMQ
     /* TODO: Option (315 series VRAM command queue) */
-    /* But beware: sisfb does not know about this!!! */
+    /* But beware: sisusbfb does not know about this!!! */
     pSiSUSB->cmdQueueSize = 512*1024;
 #endif
     pSiSUSB->HWCursor = TRUE;
 
-    pSiSUSB->NoAccel = TRUE; /* ! */
-    pSiSUSB->ShadowFB = TRUE;
+    pSiSUSB->NoAccel = TRUE;	/* ! */
+    pSiSUSB->ShadowFB = TRUE;	/* ! */
 
     pSiSUSB->timeout = 0;
 
     pSiSUSB->VESA = -1;
+#ifdef SIS_GLOBAL_ENABLEXV
     pSiSUSB->NoXvideo = FALSE;
+#else
+    pSiSUSB->NoXvideo = TRUE;
+#endif
     pSiSUSB->maxxfbmem = 0;
     pSiSUSB->DSTN = FALSE;
     pSiSUSB->FSTN = FALSE;
@@ -261,15 +273,15 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     switch(pSiSUSB->timeout) {
     case -1:
        xf86DrvMsg(pScrn->scrnIndex, from,
-       		"Device disconnection will abort X server\n");
+		"Device disconnection will abort X server\n");
        break;
     case 0:
        xf86DrvMsg(pScrn->scrnIndex, from,
-       		"Device will be re-probed forever after disconnection\n");
+		"Device will be re-probed forever after disconnection\n");
        break;
     default:
        xf86DrvMsg(pScrn->scrnIndex, from,
-       		"Device will be re-probed for %d seconds after disconnection\n",
+		"Device will be re-probed for %d seconds after disconnection\n",
 		pSiSUSB->timeout);
        break;
     }
@@ -319,11 +331,13 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
 #endif
 #endif
 
+#if 0
 #ifdef SISVRAMQ
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Using VRAM command queue, size %dk\n",
 	  	pSiSUSB->cmdQueueSize / 1024);
 #else
     xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Using MMIO command queue, size 512k\n");
+#endif
 #endif
 
     /* RestoreBySetMode
@@ -370,6 +384,7 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     /* NoXVideo
      * Set this to TRUE to disable Xv hardware video acceleration
      */
+#ifdef SIS_GLOBAL_ENABLEXV
     if(!pSiSUSB->NoXvideo) {
        if(xf86ReturnOptValBool(pSiSUSB->Options, OPTION_NOXVIDEO, FALSE)) {
           pSiSUSB->NoXvideo = TRUE;
@@ -401,30 +416,30 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
 	     if(val) pSiSUSB->XvDefDisableGfx = TRUE;
 	     xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
 	        "Graphics display will be %s during Xv usage\n",
-	     	val ? disabledstr : enabledstr);
+		val ? disabledstr : enabledstr);
           }
 
 	  if(xf86GetOptValBool(pSiSUSB->Options, OPTION_XVDEFDISABLEGFXLR, &val)) {
 	     if(val) pSiSUSB->XvDefDisableGfxLR = TRUE;
 	     xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-	   	   "Graphics display left/right of overlay will be %s during Xv usage\n",
+		   "Graphics display left/right of overlay will be %s during Xv usage\n",
 		   val ? disabledstr : enabledstr);
           }
 	  if(xf86GetOptValBool(pSiSUSB->Options, OPTION_XVDISABLECOLORKEY, &val)) {
 	     if(val) pSiSUSB->XvDisableColorKey = TRUE;
 	     xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-	     	   "Xv Color key is %s\n",
+		   "Xv Color key is %s\n",
 		   val ? disabledstr : enabledstr);
           }
 	  if(xf86GetOptValBool(pSiSUSB->Options, OPTION_XVUSECHROMAKEY, &val)) {
 	     xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-	     	   "Xv Chroma-keying is %s\n",
+		   "Xv Chroma-keying is %s\n",
 		   val ? enabledstr : disabledstr);
 	     if(val) pSiSUSB->XvUseChromaKey = TRUE;
           }
 	  if(xf86GetOptValBool(pSiSUSB->Options, OPTION_XVINSIDECHROMAKEY, &val)) {
 	     xf86DrvMsg(pScrn->scrnIndex, X_CONFIG,
-	     	   "Xv: Video is transparent if %s chroma key range\n",
+		   "Xv: Video is transparent if %s chroma key range\n",
 		   val ? "inside" : "outside");
 	     if(val) pSiSUSB->XvInsideChromaKey = TRUE;
           }
@@ -459,6 +474,7 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
 
        }
     }
+#endif
 
     if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_STOREDBRI))) {
        SiSUSB_EvalOneOrThreeFloats(pScrn, OPTION_STOREDBRI, briopt, strptr,

@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_utility.c,v 1.2 2005/04/22 23:42:43 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * SiSUSB driver utility interface & routines
  *
@@ -244,17 +244,18 @@ int		SISUSBHandleMessage(int scrnIndex, const char *msgtype,
 void		SiSUSBCtrlExtInit(ScrnInfoPtr pScrn);
 void		SiSUSBCtrlExtUnregister(SISUSBPtr pSiSUSB, int index);
 
+#ifdef SIS_GLOBAL_ENABLEXV
 #ifdef XV_SD_DEPRECATED
 int		SISUSBSetPortUtilAttribute(ScrnInfoPtr pScrn, Atom attribute,
 					INT32 value, SISUSBPortPrivPtr pPriv);
 int		SISUSBGetPortUtilAttribute(ScrnInfoPtr pScrn,  Atom attribute,
 					INT32 *value, SISUSBPortPrivPtr pPriv);
 #endif
-
 #ifdef SIS_ENABLEXV
 extern void	SiSUSBUpdateXvGamma(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv);
 #endif
 extern void	SISUSBSetPortDefaults(ScrnInfoPtr pScrn, SISUSBPortPrivPtr pPriv);
+#endif /* SIS_GLOBAL_ENABLEXV */
 
 /***********************************
  *     MessageHandler interface    *
@@ -325,7 +326,7 @@ SiSHandleSiSDirectCommand(xSiSCtrlCommandReply *sdcbuf)
       sdcbuf->sdc_result[3]  = 0;
       sdcbuf->sdc_result[4]  = 0;
       sdcbuf->sdc_result[5]  = pSiSUSB->ChipFlags;
-      sdcbuf->sdc_result[6]  = pSiSUSB->sishw_ext.jChipType;
+      sdcbuf->sdc_result[6]  = pSiSUSB->ChipType;
       sdcbuf->sdc_result[7]  = pSiSUSB->ChipRev;
       sdcbuf->sdc_result[8]  = SISUSBDRIVERVERSIONYEAR;
       sdcbuf->sdc_result[9]  = SISUSBDRIVERVERSIONMONTH;
@@ -343,6 +344,7 @@ SiSHandleSiSDirectCommand(xSiSCtrlCommandReply *sdcbuf)
       sdcbuf->sdc_result[2] = pSiSUSB->SiS_SD_Flags;
       sdcbuf->sdc_result[3] = pSiSUSB->SiS_SD2_Flags;
       sdcbuf->sdc_result[4] = 0; /* No CRT2 devices */
+      sdcbuf->sdc_result[5] = pSiSUSB->VBFlags2;
       break;
 
    case SDC_CMD_GETVBFLAGSVERSION:
@@ -351,6 +353,7 @@ SiSHandleSiSDirectCommand(xSiSCtrlCommandReply *sdcbuf)
 
    case SDC_CMD_GETVBFLAGS:
       sdcbuf->sdc_result[0] = pSiSUSB->VBFlags;
+      sdcbuf->sdc_result[1] = pSiSUSB->VBFlags2;
       break;
 
    case SDC_CMD_CHECKMODEFORCRT2:
@@ -672,7 +675,9 @@ SiSHandleSiSDirectCommand(xSiSCtrlCommandReply *sdcbuf)
 
    case SDC_CMD_SETXVDEFAULTS:
       if(pPriv) {
+#ifdef SIS_GLOBAL_ENABLEXV
          SISUSBSetPortDefaults(pScrn, pPriv);
+#endif
       } else sdcbuf->sdc_result_header = SDC_RESULT_INVAL;
       break;
 
@@ -1138,7 +1143,7 @@ SISUSBGetPortUtilAttribute(ScrnInfoPtr pScrn,  Atom attribute,
   } else if(attribute == pSiSUSB->xv_GDV) {
      *value = SISUSBDRIVERIVERSION;
   } else if(attribute == pSiSUSB->xv_GHI) {
-     *value = (pSiSUSB->ChipFlags & 0xffff) | (pSiSUSB->sishw_ext.jChipType << 16) | (pSiSUSB->ChipRev << 24);
+     *value = (pSiSUSB->ChipFlags & 0xffff) | (pSiSUSB->ChipType << 16) | (pSiSUSB->ChipRev << 24);
   } else if(attribute == pSiSUSB->xv_GBI) {
      *value = ((pSiSUSB->USBBus & 0xff) << 8) | (pSiSUSB->USBDev & 0xff);
   } else if(attribute == pSiSUSB->xv_QVV) {

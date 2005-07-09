@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: xc/programs/Xserver/hw/xfree86/drivers/sisusb/sisusb_struct.h,v 1.2 2005/01/26 01:21:20 twini Exp $ */
+/* $XdotOrg$ */
 /*
  * General structure definitions for universal mode switching modules
  *
@@ -116,7 +116,12 @@ typedef struct _SiS_ModeResInfoStruct
 
 typedef struct _SiS_Private
 {
+	unsigned char ChipType;
+	unsigned char ChipRevision;
+
 	void *pSiSUSB;
+	SISIOADDRESS IOAddress;
+
 	SISIOADDRESS SiS_P3c4;
 	SISIOADDRESS SiS_P3d4;
 	SISIOADDRESS SiS_P3c0;
@@ -128,6 +133,7 @@ typedef struct _SiS_Private
 	SISIOADDRESS SiS_P3c8;
 	SISIOADDRESS SiS_P3c9;
 	SISIOADDRESS SiS_P3cb;
+	SISIOADDRESS SiS_P3cc;
 	SISIOADDRESS SiS_P3cd;
 	SISIOADDRESS SiS_P3da;
 	SISIOADDRESS SiS_Part1Port;
