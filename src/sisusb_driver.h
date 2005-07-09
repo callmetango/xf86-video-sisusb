@@ -119,7 +119,7 @@ static void	SiSUSBDumpModeInfo(ScrnInfoPtr pScrn, DisplayModePtr mode);
 #endif
 void		SISUSBSaveDetectedDevices(ScrnInfoPtr pScrn);
 
-/* Our very own vgaHW functions (sis_vga.c) */
+/* Our very own vgaHW functions (sisusb_vga.c) */
 extern void	SiSUSBVGASave(ScrnInfoPtr pScrn, SISUSBRegPtr save, int flags);
 extern void	SiSUSBVGARestore(ScrnInfoPtr pScrn, SISUSBRegPtr restore, int flags);
 extern void	SiSUSBVGASaveFonts(ScrnInfoPtr pScrn);
@@ -142,18 +142,16 @@ extern void	SISUSBCRT1PreInit(ScrnInfoPtr pScrn);
 extern void	SiSUSBCtrlExtInit(ScrnInfoPtr pScrn);
 extern void	SiSUSBCtrlExtUnregister(SISUSBPtr pSiSUSB, int index);
 
-/* init.c ----- (use its data types!) */
+/* sisusb_init.c ----- (use its data types!) */
 extern USHORT   SiSUSB_GetModeID(int VGAEngine, unsigned int VBFlags, int HDisplay, int VDisplay,
 					int Depth, BOOLEAN FSTN, int LCDwith, int LCDheight);
-extern int	SiSUSBTranslateToOldMode(int modenumber);
-extern BOOLEAN	SiSUSBDetermineROMLayout661(SiS_Private *SiS_Pr);
 extern BOOLEAN	SiSUSBBIOSSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn, DisplayModePtr mode,
 					BOOLEAN IsCustom);
 extern BOOLEAN	SiSUSBSetMode(SiS_Private *SiS_Pr, ScrnInfoPtr pScrn, USHORT ModeNo,
 					BOOLEAN dosetpitch);
 extern DisplayModePtr SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes,
 					BOOLEAN isfordvi, BOOLEAN fakecrt2modes);
-/* End of init.c, init301.c ----- */
+/* End of sisusb_init.c ----- */
 
 
 

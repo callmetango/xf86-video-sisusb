@@ -44,13 +44,9 @@ void SiSUSBRestoreBridge(ScrnInfoPtr pScrn, SISUSBRegPtr sisReg);
 
 extern int      SiSUSBCalcVRate(DisplayModePtr mode);
 
-/* Functions from init.c and init301.c (use their datatypes!) */
-extern void     SiSUSB_UnLockCRT2(SiS_Private *SiS_Pr);
-extern void     SiSUSB_LockCRT2(SiS_Private *SiS_Pr);
-extern void     SiSUSB_DDC2Delay(SiS_Private *SiS_Pr, USHORT delaytime);
+/* Functions from sisusb_init.c (use its datatypes!) */
 extern void     SiSUSB_DisplayOn(SiS_Private *SiS_Pr);
 extern UCHAR	SiSUSB_GetSetModeID(ScrnInfoPtr pScrn, UCHAR id);
 extern void	SiSUSBRegInit(SiS_Private *SiS_Pr, USHORT BaseAddr);
-extern void     SiSUSBSetLVDSetc(SiS_Private *SiS_Pr, USHORT ModeNo);
 
 /* End of init.c/init301.c imports */
