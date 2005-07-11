@@ -63,6 +63,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "sisusb.h"
 #define NEED_cpu_to_le16
 #define NEED_cpu_to_le32

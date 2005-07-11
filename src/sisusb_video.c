@@ -36,6 +36,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "sisusb.h"
 
 #ifdef SIS_GLOBAL_ENABLEXV

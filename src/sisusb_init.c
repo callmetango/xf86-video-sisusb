@@ -32,6 +32,10 @@
  *
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "sisusb_init.h"
 
 #if defined(ALLOC_PRAGMA)
