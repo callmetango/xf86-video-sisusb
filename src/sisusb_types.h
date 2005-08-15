@@ -189,7 +189,9 @@ struct _SISUSB_INFO {
 
 	CARD32  sisusb_fbdevactive;	/* != 0 if framebuffer device active */
 
-	CARD8 	sisusb_reserved[32]; 	/* for future use */
+	CARD32  sisusb_conactive;	/* != 0 if console driver active */
+
+	CARD8 	sisusb_reserved[28]; 	/* for future use */
 };
 
 typedef struct _SISUSB_COMMAND sisusb_command, *psisusb_command;
@@ -213,6 +215,9 @@ struct _SISUSB_COMMAND {
 
 /* Clear video RAM */
 #define SUCMD_CLRSCR   0x07	/* data0:1:2 = length, data3 = address */
+
+/* Restore text mode & fonts (console driver) */
+#define SUCMD_RESETTEXTMODE 0x08
 
 /* ioctl numbers */
 #define SISUSB_GET_CONFIG_SIZE 	0x8004f33e     	/* _IOR(0xF3,0x3E,__u32) */

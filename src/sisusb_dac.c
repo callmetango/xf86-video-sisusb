@@ -969,6 +969,22 @@ void sisclearvram(SISUSBPtr pSiSUSB, UChar *where, unsigned int howmuch)
    if(!retry) SiSLostConnection(pSiSUSB);
 }
 
+void sisrestoreconsole(SISUSBPtr pSiSUSB)
+{
+   int num, retry = 3;
+   sisusb_command x;
+   if(pSiSUSB->sisusbfatalerror) return;
+   do {
+      x.operation = SUCMD_RESETTEXTMODE;
+      x.data3 = 0;
+      x.data0 = 0;
+      x.data1 = 0;
+      x.data2 = 0;
+      num = ioctl(pSiSUSB->sisusbdev, SISUSB_COMMAND, &x);
+   } while((num) && --retry);
+   if(!retry) SiSLostConnection(pSiSUSB);
+}
+
 /* MMIO */
 
 void SIS_MMIO_OUT8(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD8 val)

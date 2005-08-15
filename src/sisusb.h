@@ -35,8 +35,8 @@
 #define _SISUSB_H_
 
 #define SISUSBDRIVERVERSIONYEAR    5
-#define SISUSBDRIVERVERSIONMONTH   7
-#define SISUSBDRIVERVERSIONDAY     9
+#define SISUSBDRIVERVERSIONMONTH   8
+#define SISUSBDRIVERVERSIONDAY     15
 #define SISUSBDRIVERREVISION       1
 
 #define SISUSBDRIVERIVERSION ((SISUSBDRIVERVERSIONYEAR << 16) |  \
@@ -138,7 +138,7 @@
 /* Need that for SiSCtrl */
 #define NEED_REPLIES		/* ? */
 #define EXTENSION_PROC_ARGS void *
-#include "extnsionst.h" 	/* required */
+#include "extnsionst.h" 			/* required */
 #include <X11/extensions/panoramiXproto.h>	/* required */
 
 #undef SISGAMMARAMP
@@ -433,7 +433,12 @@ typedef unsigned char  UChar;
 #define SiS_SD2_SUPPORTXVDEINT 0x00080000   /* Xv deinterlacing supported (n/a) */
 #define SiS_SD2_ISXGI	       0x00100000   /* Is XGI chip */
 #define SiS_SD2_USEVBFLAGS2    0x00200000   /* Use VBFlags2 for bridge ID */
+#define SiS_SD2_SUPPLTFLAG     0x00400000   /* Driver supports the following 3 flags */
+#define SiS_SD2_ISLAPTOP       0x00800000   /* This machine is (very probably) a laptop */
+#define SiS_SD2_MACHINETYPE2   0x01000000   /* Machine type 2 (for future use) */
+#define SiS_SD2_MACHINETYPE3   0x02000000   /* Machine type 3 (for future use) */
 /* ... */
+#define SiS_SD2_HAVESD34       0x40000000   /* Support SD3 and SD4 flags (for future use) */
 #define SiS_SD2_NOOVERLAY      0x80000000   /* No video overlay */
 
 #define SIS_DIRECTKEY          0x03145792
@@ -603,7 +608,7 @@ typedef struct {
     /* sisusb and sisusbfb communication */
     CARD32		USBBus, USBDev;
     Bool		sisusbdevopen;
-    int 		sisusbdev, sisusb_minor, sisusbfbactive;
+    int 		sisusbdev, sisusb_minor, sisusbfbactive, sisusbconactive;
     int			sisusberrorsleepcount;
     int 		sisusbfatalerror, timeout;
     Time		errorTime;
@@ -679,7 +684,7 @@ typedef struct {
     ULong		xv_sd_result;
     int			CRT1isoff;
     ULong       	ChipFlags;
-    ULong       	SiS_SD_Flags, SiS_SD2_Flags;
+    ULong       	SiS_SD_Flags, SiS_SD2_Flags, SiS_SD3_Flags, SiS_SD4_Flags;
     Bool		UseHWARGBCursor;
     int			OptUseColorCursor;
     UShort      	cursorBufferNum;
@@ -771,6 +776,7 @@ extern void   andSISIDXREG(SISUSBPtr pSiSUSB, ULong base, UChar idx, UChar val);
 extern void   setSISIDXREG(SISUSBPtr pSiSUSB, ULong base, UChar idx, UChar myand, UChar myor);
 extern void   setSISIDXREGmask(SISUSBPtr pSiSUSB, ULong base, UChar idx, UChar data, UChar mask);
 extern void   sisclearvram(SISUSBPtr pSiSUSB, UChar *where, unsigned int howmuch);
+extern void   sisrestoreconsole(SISUSBPtr pSiSUSB);
 extern void   SIS_MMIO_OUT8(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD8 val);
 extern void   SIS_MMIO_OUT16(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD16 val);
 extern void   SIS_MMIO_OUT32(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD32 val);

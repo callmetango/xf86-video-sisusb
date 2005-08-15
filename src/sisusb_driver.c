@@ -284,10 +284,13 @@ SiSUSBCheckForUSBDongle(char *filename, SISUSBPtr pSiSUSB, int *filehandle)
 		      pSiSUSB->sisusbversion    = mysisusbinfo->sisusb_version;
 		      pSiSUSB->sisusbrevision   = mysisusbinfo->sisusb_revision;
 		      pSiSUSB->sisusbpatchlevel = mysisusbinfo->sisusb_patchlevel;
+		      pSiSUSB->sisusbfbactive   = 0;
+		      pSiSUSB->sisusbconactive  = 0;
 		      if(sisusbversion >= 0x000007) {
 		         pSiSUSB->sisusbfbactive = mysisusbinfo->sisusb_fbdevactive;
-		      } else {
-		         pSiSUSB->sisusbfbactive = 0;
+		      }
+		      if(sisusbversion >= 0x000008) {
+		         pSiSUSB->sisusbconactive = mysisusbinfo->sisusb_conactive;
 		      }
 		   }
 		   if(filehandle) {
@@ -823,6 +826,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     /* Determine chipset and VGA engine type */
     pSiSUSB->ChipFlags = 0;
     pSiSUSB->SiS_SD_Flags = pSiSUSB->SiS_SD2_Flags = 0;
+    pSiSUSB->SiS_SD3_Flags = pSiSUSB->SiS_SD4_Flags = 0;
     pSiSUSB->HWCursorMBufNum = pSiSUSB->HWCursorCBufNum = 0;
     pSiSUSB->NeedFlush = FALSE;
 
@@ -1532,7 +1536,11 @@ SISUSBRestore(ScrnInfoPtr pScrn)
     outSISIDXREG(pSiSUSB,SISCR, pSiSUSB->myCR63, pSiSUSB->oldCR63);
     outSISIDXREG(pSiSUSB,SISSR, 0x1f, pSiSUSB->oldSR1F);
 
-    if( (pSiSUSB->restorebyset) && (pSiSUSB->OldMode) ) {
+    if(pSiSUSB->sisusbconactive) {
+
+	   sisrestoreconsole(pSiSUSB);
+
+    } else if( (pSiSUSB->restorebyset) && (pSiSUSB->OldMode) ) {
 
 	   int mymode = pSiSUSB->OldMode;
 
@@ -1561,9 +1569,11 @@ SISUSBRestore(ScrnInfoPtr pScrn)
 
     }
 
-    SiSUSBVGAProtect(pScrn, TRUE);
-    SiSUSBVGARestore(pScrn, sisReg, flags);
-    SiSUSBVGAProtect(pScrn, FALSE);
+    if(!pSiSUSB->sisusbconactive) {
+       SiSUSBVGAProtect(pScrn, TRUE);
+       SiSUSBVGARestore(pScrn, sisReg, flags);
+       SiSUSBVGAProtect(pScrn, FALSE);
+    }
 
     sisusbRestoreExtRegisterLock(pSiSUSB,sisReg->sisRegs3C4[0x05],sisReg->sisRegs3D4[0x80]);
 }
@@ -1974,6 +1984,9 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 #endif
 
     pSiSUSB->SiS_SD2_Flags |= SiS_SD2_NODDCSUPPORT;
+
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_SUPPLTFLAG;
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_HAVESD34;
 
     SiSUSBCtrlExtInit(pScrn);
 
