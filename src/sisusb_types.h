@@ -216,8 +216,8 @@ struct _SISUSB_COMMAND {
 /* Clear video RAM */
 #define SUCMD_CLRSCR   0x07	/* data0:1:2 = length, data3 = address */
 
-/* Restore text mode & fonts (console driver) */
-#define SUCMD_RESETTEXTMODE 0x08
+/* Restore text mode & fonts (console driver); destroy text mode */
+#define SUCMD_HANDLETEXTMODE 0x08
 
 /* ioctl numbers */
 #define SISUSB_GET_CONFIG_SIZE 	0x8004f33e     	/* _IOR(0xF3,0x3E,__u32) */

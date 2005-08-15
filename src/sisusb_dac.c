@@ -969,15 +969,15 @@ void sisclearvram(SISUSBPtr pSiSUSB, UChar *where, unsigned int howmuch)
    if(!retry) SiSLostConnection(pSiSUSB);
 }
 
-void sisrestoreconsole(SISUSBPtr pSiSUSB)
+void sisrestoredestroyconsole(SISUSBPtr pSiSUSB, int what)
 {
    int num, retry = 3;
    sisusb_command x;
    if(pSiSUSB->sisusbfatalerror) return;
    do {
-      x.operation = SUCMD_RESETTEXTMODE;
+      x.operation = SUCMD_HANDLETEXTMODE;
       x.data3 = 0;
-      x.data0 = 0;
+      x.data0 = what;
       x.data1 = 0;
       x.data2 = 0;
       num = ioctl(pSiSUSB->sisusbdev, SISUSB_COMMAND, &x);

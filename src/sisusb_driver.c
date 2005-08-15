@@ -1465,6 +1465,13 @@ SISUSBModeInit(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
+    /* Notify kernel driver that we are about
+     * to destoy the text console
+     */
+    if(pSiSUSB->sisusbconactive) {
+       sisrestoredestroyconsole(pSiSUSB, 1);
+    }
+
     andSISIDXREG(pSiSUSB,SISCR,0x11,0x7f);   	/* Unlock CRTC registers */
 
     SISUSBModifyModeInfo(mode);		/* Quick check of the mode parameters */
@@ -1538,7 +1545,7 @@ SISUSBRestore(ScrnInfoPtr pScrn)
 
     if(pSiSUSB->sisusbconactive) {
 
-	   sisrestoreconsole(pSiSUSB);
+	   sisrestoredestroyconsole(pSiSUSB, 0);
 
     } else if( (pSiSUSB->restorebyset) && (pSiSUSB->OldMode) ) {
 

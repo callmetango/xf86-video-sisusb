@@ -776,7 +776,7 @@ extern void   andSISIDXREG(SISUSBPtr pSiSUSB, ULong base, UChar idx, UChar val);
 extern void   setSISIDXREG(SISUSBPtr pSiSUSB, ULong base, UChar idx, UChar myand, UChar myor);
 extern void   setSISIDXREGmask(SISUSBPtr pSiSUSB, ULong base, UChar idx, UChar data, UChar mask);
 extern void   sisclearvram(SISUSBPtr pSiSUSB, UChar *where, unsigned int howmuch);
-extern void   sisrestoreconsole(SISUSBPtr pSiSUSB);
+extern void   sisrestoredestroyconsole(SISUSBPtr pSiSUSB, int what);
 extern void   SIS_MMIO_OUT8(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD8 val);
 extern void   SIS_MMIO_OUT16(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD16 val);
 extern void   SIS_MMIO_OUT32(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD32 val);
