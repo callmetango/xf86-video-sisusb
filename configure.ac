@@ -46,7 +46,7 @@ AC_ARG_WITH(xorg-module-dir,
             [moduledir="$withval"],
             [moduledir="$libdir/xorg/modules"])
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XORG, [xorg-server xproto panoramixproto])
+PKG_CHECK_MODULES(XORG, [xorg-server xproto xineramaproto])
 sdkdir=$(pkg-config --variable=sdkdir xorg-server)
 
 # Checks for libraries.
