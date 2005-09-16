@@ -35,8 +35,8 @@
 #define _SISUSB_H_
 
 #define SISUSBDRIVERVERSIONYEAR    5
-#define SISUSBDRIVERVERSIONMONTH   8
-#define SISUSBDRIVERVERSIONDAY     15
+#define SISUSBDRIVERVERSIONMONTH   9
+#define SISUSBDRIVERVERSIONDAY     16
 #define SISUSBDRIVERREVISION       1
 
 #define SISUSBDRIVERIVERSION ((SISUSBDRIVERVERSIONYEAR << 16) |  \
@@ -437,9 +437,14 @@ typedef unsigned char  UChar;
 #define SiS_SD2_ISLAPTOP       0x00800000   /* This machine is (very probably) a laptop */
 #define SiS_SD2_MACHINETYPE2   0x01000000   /* Machine type 2 (for future use) */
 #define SiS_SD2_MACHINETYPE3   0x02000000   /* Machine type 3 (for future use) */
-/* ... */
+#define SiS_SD2_SUPPORT625I    0x04000000   /* Support YPbPr 625i */
+#define SiS_SD2_SUPPORT625P    0x08000000   /* Support YPbPr 625p */
+#define SiS_SD2_VBINVB2ONLY    0x10000000   /* VB_* bits in vbflags no longer used for vb type */
+#define SiS_SD2_NEWGAMMABRICON 0x20000000   /* Support new gamma brightness/contrast */
 #define SiS_SD2_HAVESD34       0x40000000   /* Support SD3 and SD4 flags (for future use) */
 #define SiS_SD2_NOOVERLAY      0x80000000   /* No video overlay */
+
+#define SiS_SD3_OLDGAMMAINUSE  0x00000001   /* Old gamma brightness is currently in use */
 
 #define SIS_DIRECTKEY          0x03145792
 
@@ -712,6 +717,8 @@ typedef struct {
     UChar *		CurMonoSrc;
     CARD32 *		CurARGBDest;
     int			GammaBriR, GammaBriG, GammaBriB;
+    float		NewGammaBriR, NewGammaBriG, NewGammaBriB;
+    float		NewGammaConR, NewGammaConG, NewGammaConB;
     Bool		HideHWCursor;  /* Custom application */
     Bool		HWCursorIsVisible;
     ULong       	HWCursorBackup[16];

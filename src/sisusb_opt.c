@@ -64,7 +64,8 @@ typedef enum {
     OPTION_XVYUVCHROMAKEY,
     OPTION_ENABLESISCTRL,
     OPTION_STOREDBRI,
-    OPTION_STOREDBRI2,
+    OPTION_NEWSTOREDBRI,
+    OPTION_NEWSTOREDCON,
     OPTION_DISCONNTIMEOUT,
     OPTION_PSEUDO
 } SISUSBOpts;
@@ -83,6 +84,8 @@ static const OptionInfoRec SISUSBOptions[] = {
     { OPTION_CRT1GAMMA,			"CRT1Gamma", 	  	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_STOREDBRI,			"GammaBrightness",  	  OPTV_STRING,    {0}, FALSE },
     { OPTION_STOREDBRI,			"StoredGammaBrightness",  OPTV_STRING,    {0}, FALSE },
+    { OPTION_NEWSTOREDBRI,		"NewGammaBrightness",	  OPTV_STRING,	  {0}, FALSE },
+    { OPTION_NEWSTOREDCON,		"NewGammaContrast",	  OPTV_STRING,	  {0}, FALSE },
 #ifdef SIS_GLOBAL_ENABLEXV
     { OPTION_NOXVIDEO,          	"NoXvideo",               OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_XVGAMMA,			"XvGamma", 	  	  OPTV_STRING,    {0}, FALSE },
@@ -178,6 +181,36 @@ SiSUSB_EvalOneOrThreeFloats(ScrnInfoPtr pScrn, int token, const char *myerror,
     return (valid);
 }
 
+static Bool
+SiSUSB_EvalOneOrThreeFloats2(ScrnInfoPtr pScrn, int token, const char *myerror,
+                         char *strptr, float *v1, float *v2, float *v3)
+{
+    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
+    float val1 = 0.0, val2 = 0.0, val3 = 0.0;
+    Bool valid = FALSE;
+    int result = sscanf(strptr, "%f %f %f", &val1, &val2, &val3);
+    if(result == 1) {
+       if((val1 >= -1.0) && (val1 <= 1.0)) {
+	  valid = TRUE;
+	  *v1 = *v2 = *v3 = val1;
+       }
+    } else if(result == 3) {
+       if((val1 >= -1.0) && (val1 <= 1.0) &&
+	  (val2 >= -1.0) && (val2 <= 1.0) &&
+	  (val3 >= -1.0) && (val3 <= 1.0)) {
+	  valid = TRUE;
+	  *v1 = val1;
+	  *v2 = val2;
+	  *v3 = val3;
+       }
+    }
+    if(!valid) {
+       xf86DrvMsg(pScrn->scrnIndex, X_WARNING, myerror,
+                  pSiSUSB->Options[SiSUSB_FIFT(pSiSUSB->Options, token)].name);
+    }
+    return (valid);
+}
+
 void
 SiSUSBOptions(ScrnInfoPtr pScrn)
 {
@@ -190,7 +223,8 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
 #ifdef SIS_GLOBAL_ENABLEXV
     static const char *gammaopt   = "%s expects either a boolean, or 1 or 3 real numbers (0.1 - 10.0)\n";
 #endif
-    static const char *briopt     = "%s expects 1 or 3 real numbers (0.1 - 10.0)\n";
+    static const char *briopt     = "%s expects one or three real numbers (0.1 - 10.0)\n";
+    static const char *newbriopt  = "%s expects one or three real numbers (-1.0 - 1.0)\n";
     Bool        val;
 
     /* Collect all of the relevant option flags (fill in pScrn->options) */
@@ -250,6 +284,8 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     pSiSUSB->XvGammaRed = pSiSUSB->XvGammaGreen = pSiSUSB->XvGammaBlue =
           pSiSUSB->XvGammaRedDef = pSiSUSB->XvGammaGreenDef = pSiSUSB->XvGammaBlueDef = 1000;
     pSiSUSB->GammaBriR = pSiSUSB->GammaBriG = pSiSUSB->GammaBriB = 1000;
+    pSiSUSB->NewGammaBriR = pSiSUSB->NewGammaBriG = pSiSUSB->NewGammaBriB = 0.0;
+    pSiSUSB->NewGammaConR = pSiSUSB->NewGammaConG = pSiSUSB->NewGammaConB = 0.0;
 
     pSiSUSB->HideHWCursor = FALSE;
     pSiSUSB->HWCursorIsVisible = FALSE;
@@ -480,9 +516,25 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     }
 #endif
 
-    if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_STOREDBRI))) {
-       SiSUSB_EvalOneOrThreeFloats(pScrn, OPTION_STOREDBRI, briopt, strptr,
-		&pSiSUSB->GammaBriR, &pSiSUSB->GammaBriG, &pSiSUSB->GammaBriB);
+    {
+       Bool GotNewBri = FALSE;
+       if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_NEWSTOREDCON))) {
+	  SiSUSB_EvalOneOrThreeFloats2(pScrn, OPTION_NEWSTOREDCON, newbriopt, strptr,
+		&pSiSUSB->NewGammaConR, &pSiSUSB->NewGammaConG, &pSiSUSB->NewGammaConB);
+	  GotNewBri = TRUE;
+       }
+       if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_NEWSTOREDBRI))) {
+	  SiSUSB_EvalOneOrThreeFloats2(pScrn, OPTION_NEWSTOREDBRI, newbriopt, strptr,
+		&pSiSUSB->NewGammaBriR, &pSiSUSB->NewGammaBriG, &pSiSUSB->NewGammaBriB);
+	  GotNewBri = TRUE;
+       }
+       if(!GotNewBri) {
+          if((strptr = (char *)xf86GetOptValString(pSiSUSB->Options, OPTION_STOREDBRI))) {
+             SiSUSB_EvalOneOrThreeFloats(pScrn, OPTION_STOREDBRI, briopt, strptr,
+		  &pSiSUSB->GammaBriR, &pSiSUSB->GammaBriG, &pSiSUSB->GammaBriB);
+	     pSiSUSB->SiS_SD3_Flags |= SiS_SD3_OLDGAMMAINUSE;
+	  }
+       }
     }
 
 }

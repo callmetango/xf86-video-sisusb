@@ -155,8 +155,14 @@
 #define SDC_CMD_GETMONGAMMACRT1		0x98980059
 #define SDC_CMD_GETMONGAMMACRT2		0x9898005a
 #define SDC_CMD_LOGQUIET		0x9898005b
+#define SDC_CMD_GETNEWGAMMABRICON	0x9898005c
+#define SDC_CMD_SETNEWGAMMABRICON	0x9898005d
+#define SDC_CMD_GETNEWGAMMABRICON2	0x9898005e
+#define SDC_CMD_SETNEWGAMMABRICON2	0x9898005f
+#define SDC_CMD_GETGETNEWGAMMACRT2	0x98980060
+#define SDC_CMD_SETGETNEWGAMMACRT2	0x98980061
 /* more to come, adapt MAXCOMMAND! */
-#define SDC_MAXCOMMAND			SDC_CMD_LOGQUIET
+#define SDC_MAXCOMMAND			SDC_CMD_SETGETNEWGAMMACRT2
 
 /* in result_header */
 #define SDC_RESULT_OK  			0x66670000
@@ -491,6 +497,16 @@ SiSHandleSiSDirectCommand(xSiSCtrlCommandReply *sdcbuf)
       sdcbuf->sdc_result[2] = pSiSUSB->GammaBriB;
       break;
 
+   case SDC_CMD_GETNEWGAMMABRICON:  /* no xv pendant */
+   case SDC_CMD_GETNEWGAMMABRICON2: /* no xv pendant */
+      sdcbuf->sdc_result[0] = (CARD32)(((int)(pSiSUSB->NewGammaBriR * 1000.0)) + 1000);
+      sdcbuf->sdc_result[1] = (CARD32)(((int)(pSiSUSB->NewGammaBriG * 1000.0)) + 1000);
+      sdcbuf->sdc_result[2] = (CARD32)(((int)(pSiSUSB->NewGammaBriB * 1000.0)) + 1000);
+      sdcbuf->sdc_result[3] = (CARD32)(((int)(pSiSUSB->NewGammaConR * 1000.0)) + 1000);
+      sdcbuf->sdc_result[4] = (CARD32)(((int)(pSiSUSB->NewGammaConG * 1000.0)) + 1000);
+      sdcbuf->sdc_result[5] = (CARD32)(((int)(pSiSUSB->NewGammaConB * 1000.0)) + 1000);
+      break;
+
    case SDC_CMD_SETGAMMABRIGHTNESS:  /* xv_BRx, xv_PBx */
    case SDC_CMD_SETGAMMABRIGHTNESS2: /* xv_BRx2, xv_PBx2 */
       if(sdcbuf->sdc_parm[0] < 100 || sdcbuf->sdc_parm[0] > 10000 ||
@@ -501,22 +517,56 @@ SiSHandleSiSDirectCommand(xSiSCtrlCommandReply *sdcbuf)
 	 pSiSUSB->GammaBriR = sdcbuf->sdc_parm[0];
 	 pSiSUSB->GammaBriG = sdcbuf->sdc_parm[1];
 	 pSiSUSB->GammaBriB = sdcbuf->sdc_parm[2];
+	 pSiSUSB->NewGammaBriR = pSiSUSB->NewGammaBriG = pSiSUSB->NewGammaBriB = 0.0;
+	 pSiSUSB->NewGammaConR = pSiSUSB->NewGammaConG = pSiSUSB->NewGammaConB = 0.0;
+	 pSiSUSB->SiS_SD3_Flags |= SiS_SD3_OLDGAMMAINUSE;
+      } else sdcbuf->sdc_result_header = SDC_RESULT_NOPERM;
+      break;
+
+   case SDC_CMD_SETNEWGAMMABRICON:  /* no xv pendant */
+   case SDC_CMD_SETNEWGAMMABRICON2: /* no xv pendant */
+      if(sdcbuf->sdc_parm[0] > 2000 || sdcbuf->sdc_parm[1] > 2000 ||
+	 sdcbuf->sdc_parm[2] > 2000 || sdcbuf->sdc_parm[3] > 2000 ||
+	 sdcbuf->sdc_parm[4] > 2000 || sdcbuf->sdc_parm[5] > 2000) {
+	 sdcbuf->sdc_result_header = SDC_RESULT_INVAL;
+      } else if(pSiSUSB->xv_sisdirectunlocked) {
+	 pSiSUSB->NewGammaBriR = ((float)((int)sdcbuf->sdc_parm[0] - 1000)) / 1000.0;
+	 pSiSUSB->NewGammaBriG = ((float)((int)sdcbuf->sdc_parm[1] - 1000)) / 1000.0;
+	 pSiSUSB->NewGammaBriB = ((float)((int)sdcbuf->sdc_parm[2] - 1000)) / 1000.0;
+	 pSiSUSB->NewGammaConR = ((float)((int)sdcbuf->sdc_parm[3] - 1000)) / 1000.0;
+	 pSiSUSB->NewGammaConG = ((float)((int)sdcbuf->sdc_parm[4] - 1000)) / 1000.0;
+	 pSiSUSB->NewGammaConB = ((float)((int)sdcbuf->sdc_parm[5] - 1000)) / 1000.0;
+	 pSiSUSB->GammaBriR = pSiSUSB->GammaBriG = pSiSUSB->GammaBriB = 1000;
+	 pSiSUSB->SiS_SD3_Flags &= ~SiS_SD3_OLDGAMMAINUSE;
       } else sdcbuf->sdc_result_header = SDC_RESULT_NOPERM;
       break;
 
    case SDC_CMD_SETGETGAMMACRT2:
+   case SDC_CMD_SETGETNEWGAMMACRT2:
       if(!pSiSUSB->xv_sisdirectunlocked) {
          sdcbuf->sdc_result_header = SDC_RESULT_NOPERM;
       }
       break;
 
    case SDC_CMD_GETGETGAMMACRT2:
-      sdcbuf->sdc_result[0] = 1000;
-      sdcbuf->sdc_result[1] = 1000;
-      sdcbuf->sdc_result[2] = 1000;
-      sdcbuf->sdc_result[3] = 1000;
-      sdcbuf->sdc_result[4] = 1000;
-      sdcbuf->sdc_result[5] = 1000;
+      sdcbuf->sdc_result[0] =
+         sdcbuf->sdc_result[1] =
+         sdcbuf->sdc_result[2] =
+         sdcbuf->sdc_result[3] =
+         sdcbuf->sdc_result[4] =
+         sdcbuf->sdc_result[5] = 1000;
+      break;
+
+   case SDC_CMD_GETGETNEWGAMMACRT2:
+      sdcbuf->sdc_result[0] =
+         sdcbuf->sdc_result[1] =
+         sdcbuf->sdc_result[2] =
+         sdcbuf->sdc_result[3] =
+         sdcbuf->sdc_result[4] =
+         sdcbuf->sdc_result[5] =
+         sdcbuf->sdc_result[6] =
+         sdcbuf->sdc_result[7] =
+         sdcbuf->sdc_result[8] = 1000;
       break;
 
    case SDC_CMD_GETHWCURSORSTATUS:
@@ -796,8 +846,9 @@ SiSUSBProcSiSCtrlCommand(ClientPtr client)
     if(!(myctrl->HandleSiSDirectCommand[rep.screen])) return BadMatch;
 
     /* Finally, execute the command */
-    if((ret = (myctrl->HandleSiSDirectCommand[rep.screen])(&rep)) == Success)
+    if((ret = (myctrl->HandleSiSDirectCommand[rep.screen])(&rep)) != Success) {
        return ret;
+    }
 
     rep.type = X_Reply;
     rep.length = (sizeof(xSiSCtrlCommandReply) - sizeof(xGenericReply)) >> 2;
@@ -1122,9 +1173,6 @@ SISUSBSetPortUtilAttribute(ScrnInfoPtr pScrn, Atom attribute,
      switch((value & 0xff000000) >> 24) {
      case 0x00: port = SISSR;    break;
      case 0x01: port = SISPART1; break;
-     case 0x02: port = SISPART2; break;
-     case 0x03: port = SISPART3; break;
-     case 0x04: port = SISPART4; break;
      case 0x05: port = SISCR;    break;
      case 0x06: port = SISVID;   break;
      default:   return BadValue;

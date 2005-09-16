@@ -589,6 +589,42 @@ SISUSBDisplayPowerManagementSet(ScrnInfoPtr pScrn, int PowerManagementMode, int 
 
 }
 
+static unsigned short
+calcgammaval(int j, int nramp, float invgamma, float bri, float c)
+{
+    float k = (float)j;
+    float nrm1 = (float)(nramp - 1);
+    float con = c * nrm1 / 3.0;
+    float l, v;
+
+    if(con != 0.0) {
+       l = nrm1 / 2.0;
+       if(con <= 0.0) {
+          k -= l;
+          k *= (l + con) / l;
+       } else {
+          l -= 1.0;
+          k -= l;
+          k *= l / (l - con);
+       }
+       k += l;
+       if(k < 0.0) k = 0.0;
+    }
+
+    if(invgamma == 1.0) {
+       v = k / nrm1 * 65535.0;
+    } else {
+       v = pow(k / nrm1, invgamma) * 65535.0 + 0.5;
+    }
+
+    v += (bri * (65535.0 / 3.0)) ;
+
+    if(v < 0.0) v = 0.0;
+    else if(v > 65535.0) v = 65535.0;
+
+    return (unsigned short)v;
+}
+
 #ifdef SISGAMMARAMP
 static void
 SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
@@ -597,10 +633,15 @@ SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
    int    i, j, nramp;
    UShort *ramp[3];
    float  gamma_max[3], framp;
+   Bool   newmethod = FALSE;
 
-   gamma_max[0] = (float)pSiSUSB->GammaBriR / 1000;
-   gamma_max[1] = (float)pSiSUSB->GammaBriG / 1000;
-   gamma_max[2] = (float)pSiSUSB->GammaBriB / 1000;
+   if(!(pSiSUSB->SiS_SD3_Flags & SiS_SD3_OLDGAMMAINUSE)) {
+      newmethod = TRUE;
+   } else {
+      gamma_max[0] = (float)pSiSUSB->GammaBriR / 1000;
+      gamma_max[1] = (float)pSiSUSB->GammaBriG / 1000;
+      gamma_max[2] = (float)pSiSUSB->GammaBriB / 1000;
+   }
 
    if(!(nramp = xf86GetGammaRampSize(pScreen))) return;
 
@@ -613,26 +654,57 @@ SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
       }
    }
 
-   for(i = 0; i < 3; i++) {
-      int fullscale = 65535 * gamma_max[i];
-      float dramp = 1. / (nramp - 1);
-      float invgamma = 0.0, v;
+   if(newmethod) {
 
-      switch(i) {
-      case 0: invgamma = 1. / pScrn->gamma.red; break;
-      case 1: invgamma = 1. / pScrn->gamma.green; break;
-      case 2: invgamma = 1. / pScrn->gamma.blue; break;
+      for(i = 0; i < 3; i++) {
+
+         float invgamma = 0.0, bri = 0.0, con = 0.0;
+
+         switch(i) {
+         case 0: invgamma = 1. / pScrn->gamma.red;
+		 bri = pSiSUSB->NewGammaBriR;
+		 con = pSiSUSB->NewGammaConR;
+		 break;
+         case 1: invgamma = 1. / pScrn->gamma.green;
+		 bri = pSiSUSB->NewGammaBriG;
+		 con = pSiSUSB->NewGammaConG;
+		 break;
+         case 2: invgamma = 1. / pScrn->gamma.blue;
+		 bri = pSiSUSB->NewGammaBriB;
+                 con = pSiSUSB->NewGammaConB;
+		 break;
+         }
+
+	 for(j = 0; j < nramp; j++) {
+	    ramp[i][j] = calcgammaval(j, nramp, invgamma, bri, con);
+	 }
+
       }
 
-      for(j = 0; j < nramp; j++) {
-         framp = pow(j * dramp, invgamma);
+   } else {
 
-         v = (fullscale < 0) ? (65535 + fullscale * framp) :
+      for(i = 0; i < 3; i++) {
+         int fullscale = 65535 * gamma_max[i];
+         float dramp = 1. / (nramp - 1);
+         float invgamma = 0.0, v;
+
+         switch(i) {
+         case 0: invgamma = 1. / pScrn->gamma.red; break;
+         case 1: invgamma = 1. / pScrn->gamma.green; break;
+         case 2: invgamma = 1. / pScrn->gamma.blue; break;
+         }
+
+         for(j = 0; j < nramp; j++) {
+            framp = pow(j * dramp, invgamma);
+
+            v = (fullscale < 0) ? (65535 + fullscale * framp) :
 	 		       fullscale * framp;
-	 if(v < 0) v = 0;
-	 else if(v > 65535) v = 65535;
-	 ramp[i][j] = (UShort)v;
+	    if(v < 0) v = 0;
+	    else if(v > 65535) v = 65535;
+	    ramp[i][j] = (UShort)v;
+         }
       }
+
    }
 
    xf86ChangeGammaRamp(pScreen, nramp, ramp[0], ramp[1], ramp[2]);
@@ -1143,6 +1215,9 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     /* Setup SD flags */
     pSiSUSB->SiS_SD_Flags |= SiS_SD_ADDLSUPFLAG;
     pSiSUSB->SiS_SD2_Flags |= SiS_SD2_USEVBFLAGS2;
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_VBINVB2ONLY;
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_HAVESD34;
+    pSiSUSB->SiS_SD2_Flags |= SiS_SD2_NEWGAMMABRICON;
 
     /* Backup detected CRT2 devices */
     SISUSBSaveDetectedDevices(pScrn);
