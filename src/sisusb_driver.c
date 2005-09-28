@@ -168,11 +168,11 @@ SISUSBIdentify(int flags)
 static Bool
 SISUSBDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr)
 {
-    CARD32 *flag;
+    xorgHWFlags *flag;
 
     switch(op) {
     case GET_REQUIRED_HW_INTERFACES:
-	flag = (CARD32 *)ptr;
+	flag = (xorgHWFlags *)ptr;
 	(*flag) = 0;
 	return TRUE;
     default:
@@ -589,6 +589,7 @@ SISUSBDisplayPowerManagementSet(ScrnInfoPtr pScrn, int PowerManagementMode, int 
 
 }
 
+#ifdef SISGAMMARAMP
 static unsigned short
 calcgammaval(int j, int nramp, float invgamma, float bri, float c)
 {
@@ -625,7 +626,6 @@ calcgammaval(int j, int nramp, float invgamma, float bri, float c)
     return (unsigned short)v;
 }
 
-#ifdef SISGAMMARAMP
 static void
 SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
 {
