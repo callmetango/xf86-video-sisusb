@@ -159,11 +159,8 @@ static Bool
 SiSUSBUseHWCursor(ScreenPtr pScreen, CursorPtr pCurs)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    SISUSBPtr  pSiSUSB = SISUSBPTR(pScrn);
-    DisplayModePtr  mode = pSiSUSB->CurrentLayout.mode;
-
-    if(mode->Flags & V_INTERLACE)
-       return FALSE;
+    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
+    DisplayModePtr mode = pSiSUSB->CurrentLayout.mode;
 
     if((mode->Flags & V_DBLSCAN) && (pCurs->bits->height > 32))
        return FALSE;
@@ -178,11 +175,9 @@ static Bool
 SiSUSBUseHWCursorARGB(ScreenPtr pScreen, CursorPtr pCurs)
 {
     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
-    SISUSBPtr  pSiSUSB = SISUSBPTR(pScrn);
-    DisplayModePtr  mode = pSiSUSB->CurrentLayout.mode;
+    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
+    DisplayModePtr mode = pSiSUSB->CurrentLayout.mode;
 
-    if(mode->Flags & V_INTERLACE)
-       return FALSE;
     if((pCurs->bits->height > 64) || (pCurs->bits->width > 64))
        return FALSE;
     if((mode->Flags & V_DBLSCAN) && (pCurs->bits->height > 32))
