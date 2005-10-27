@@ -72,9 +72,6 @@ typedef enum {
 
 static const OptionInfoRec SISUSBOptions[] = {
     { OPTION_DISCONNTIMEOUT,           	"DisconnectTimeout",      OPTV_INTEGER,   {0}, FALSE },
-#if 0
-    { OPTION_NOACCEL,           	"NoAccel",                OPTV_BOOLEAN,   {0}, FALSE },
-#endif
     { OPTION_ENABLESISCTRL,		"EnableSiSCtrl",   	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_SW_CURSOR,         	"SWCursor",               OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_HW_CURSOR,         	"HWCursor",               OPTV_BOOLEAN,   {0}, FALSE },
@@ -84,7 +81,9 @@ static const OptionInfoRec SISUSBOptions[] = {
     { OPTION_CRT1GAMMA,			"CRT1Gamma", 	  	  OPTV_BOOLEAN,   {0}, FALSE },
     { OPTION_STOREDBRI,			"GammaBrightness",  	  OPTV_STRING,    {0}, FALSE },
     { OPTION_STOREDBRI,			"StoredGammaBrightness",  OPTV_STRING,    {0}, FALSE },
+    { OPTION_NEWSTOREDBRI,		"Brightness",		  OPTV_STRING,	  {0}, FALSE },
     { OPTION_NEWSTOREDBRI,		"NewGammaBrightness",	  OPTV_STRING,	  {0}, FALSE },
+    { OPTION_NEWSTOREDCON,		"Contrast",		  OPTV_STRING,	  {0}, FALSE },
     { OPTION_NEWSTOREDCON,		"NewGammaContrast",	  OPTV_STRING,	  {0}, FALSE },
 #ifdef SIS_GLOBAL_ENABLEXV
     { OPTION_NOXVIDEO,          	"NoXvideo",               OPTV_BOOLEAN,   {0}, FALSE },
@@ -326,16 +325,6 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
        break;
     }
 
-    /* NoAccel
-     * Turns off 2D acceleration
-     */
-#if 0
-    if(xf86ReturnOptValBool(pSiSUSB->Options, OPTION_NOACCEL, FALSE)) {
-       pSiSUSB->NoAccel = TRUE;
-       xf86DrvMsg(pScrn->scrnIndex, X_CONFIG, "2D Acceleration disabled\n");
-    }
-#endif
-
     /* SWCursor, HWCursor
      * Chooses whether to use the hardware or software cursor
      */
@@ -371,15 +360,6 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
 #endif
 #endif
 
-#if 0
-#ifdef SISVRAMQ
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Using VRAM command queue, size %dk\n",
-	  	pSiSUSB->cmdQueueSize / 1024);
-#else
-    xf86DrvMsg(pScrn->scrnIndex, X_INFO, "Using MMIO command queue, size 512k\n");
-#endif
-#endif
-
     /* RestoreBySetMode
      * Set this to force the driver to set the old mode instead of restoring
      * the register contents. This can be used to overcome problems with
@@ -408,12 +388,7 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     }
 
     /* NoInternalModes (300/315/330 series only)
-     * Since the mode switching code for these chipsets is a
-     * Asm-to-C translation of BIOS code, we only have timings
-     * for a pre-defined number of modes. The default behavior
-     * is to replace XFree's default modes with a mode list
-     * generated out of the known and supported modes. Use
-     * this option to disable this. NOT RECOMMENDED.
+     * Don't use that.
      */
     if(xf86GetOptValBool(pSiSUSB->Options, OPTION_NOINTERNALMODES, &pSiSUSB->noInternalModes)) {
        if(pSiSUSB->noInternalModes) {
