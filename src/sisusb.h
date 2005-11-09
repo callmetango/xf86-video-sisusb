@@ -64,7 +64,7 @@
 
 #define SISUSB_MAJOR_VERSION       0
 #define SISUSB_MINOR_VERSION       7
-#define SISUSB_PATCHLEVEL          0
+#define SISUSB_PATCHLEVEL          1
 #define SISUSB_CURRENT_VERSION     ((SISUSB_MAJOR_VERSION << 16) | 	\
                                    (SISUSB_MINOR_VERSION << 8)   |	\
 				   SISUSB_PATCHLEVEL)
