@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg$ */
+/* $XdotOrg: driver/xf86-video-sisusb/src/sisusb_video.c,v 1.8 2005/07/11 02:30:00 ajax Exp $ */
 /*
  * Xv driver for SiS 315 USB
  *
@@ -1560,7 +1560,8 @@ SISUSBPutImage(
   int id, UChar *buf,
   short width, short height,
   Bool sync,
-  RegionPtr clipBoxes, pointer data
+  RegionPtr clipBoxes, pointer data,
+  DrawablePtr pDraw
 ){
    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
    SISUSBPortPrivPtr pPriv = (SISUSBPortPrivPtr)data;
