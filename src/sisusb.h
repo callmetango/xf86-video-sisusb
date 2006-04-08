@@ -1,5 +1,5 @@
 /* $XFree86$ */
-/* $XdotOrg: driver/xf86-video-sisusb/src/sisusb.h,v 1.15 2005/11/09 21:31:21 kem Exp $ */
+/* $XdotOrg: driver/xf86-video-sisusb/src/sisusb.h,v 1.16 2006/04/07 21:10:49 ajax Exp $ */
 /*
  * Main global data and definitions
  *
@@ -72,7 +72,7 @@
 
 #define SISUSB_MAJOR_VERSION       0
 #define SISUSB_MINOR_VERSION       8
-#define SISUSB_PATCHLEVEL          0
+#define SISUSB_PATCHLEVEL          1
 #define SISUSB_CURRENT_VERSION     ((SISUSB_MAJOR_VERSION << 16) | 	\
                                    (SISUSB_MINOR_VERSION << 8)   |	\
 				   SISUSB_PATCHLEVEL)
