@@ -1,5 +1,3 @@
-/* $XFree86$ */
-/* $XdotOrg: driver/xf86-video-sisusb/src/sisusb.h,v 1.16 2006/04/07 21:10:49 ajax Exp $ */
 /*
  * Main global data and definitions
  *

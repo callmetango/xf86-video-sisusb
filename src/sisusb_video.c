@@ -1,5 +1,3 @@
-/* $XFree86$ */
-/* $XdotOrg: driver/xf86-video-sisusb/src/sisusb_video.c,v 1.8 2005/07/11 02:30:00 ajax Exp $ */
 /*
  * Xv driver for SiS 315 USB
  *
