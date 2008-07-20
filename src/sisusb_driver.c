@@ -43,8 +43,6 @@
 #include "mibank.h"
 #include "mipointer.h"
 #include "mibstore.h"
-#define _XF86MISC_SERVER_
-#include <X11/extensions/xf86misc.h>
 
 #include "sisusb_regs.h"
 #include "sisusb_dac.h"
@@ -482,11 +480,7 @@ SISUSBProbe(DriverPtr drv, int flags)
             pScrn->LeaveVT          = SISUSBLeaveVT;
             pScrn->FreeScreen       = SISUSBFreeScreen;
             pScrn->ValidMode        = SISUSBValidMode;
-#ifdef X_XF86MiscPassMessage
-	    if(xf86GetVersion() >= XF86_VERSION_NUMERIC(4,3,99,2,0)) {
-	       pScrn->HandleMessage = SISUSBHandleMessage;
-            }
-#endif
+
             foundScreen = TRUE;
         }
 
