@@ -95,7 +95,7 @@
 #include "xorgVersion.h"
 #define SISUSBMYSERVERNAME "X.org"
 #ifndef XF86_VERSION_NUMERIC
-#define XF86_VERSION_NUMERIC(major,minor,patch,snap,dummy) \
+#define XF86_VERSION_NUMERIC(major,minor,patch,snap) \
 	(((major) * 10000000) + ((minor) * 100000) + ((patch) * 1000) + snap)
 #define XF86_VERSION_CURRENT XF86_VERSION_NUMERIC(4,3,99,902)
 #endif
