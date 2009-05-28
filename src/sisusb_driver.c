@@ -90,24 +90,6 @@ static SymTabRec SISUSBChipsets[] = {
     { -1,              NULL }
 };
 
-static const char *fbSymbols[] = {
-    "fbPictureInit",
-    "fbScreenInit",
-    NULL
-};
-
-static const char *shadowSymbols[] = {
-    "ShadowFBInit",
-    NULL
-};
-
-static const char *ramdacSymbols[] = {
-    "xf86CreateCursorInfoRec",
-    "xf86DestroyCursorInfoRec",
-    "xf86InitCursor",
-    NULL
-};
-
 #ifdef XFree86LOADER
 
 static MODULESETUPPROTO(sisusbSetup);
@@ -143,7 +125,6 @@ sisusbSetup(pointer module, pointer opts, int *errmaj, int *errmin)
     if(!setupDone) {
        setupDone = TRUE;
        xf86AddDriver(&SISUSB, module, SISUSB_HaveDriverFuncs);
-       LoaderRefSymLists(fbSymbols, shadowSymbols, ramdacSymbols, NULL);
        return (pointer)TRUE;
     }
 
@@ -874,8 +855,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
        return FALSE;
     }
 
-    xf86LoaderReqSymLists(ramdacSymbols, NULL);
-
     /* Set pScrn->monitor */
     pScrn->monitor = pScrn->confScreen->monitor;
 
@@ -1444,7 +1423,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
         SISUSBFreeRec(pScrn);
         return FALSE;
     }
-    xf86LoaderReqSymLists(fbSymbols, NULL);
 
     /* Load shadowfb (if needed) */
     if(pSiSUSB->ShadowFB) {
@@ -1454,7 +1432,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 	  SISUSBFreeRec(pScrn);
           return FALSE;
        }
-       xf86LoaderReqSymLists(shadowSymbols, NULL);
     }
 
     pSiSUSB->UseVESA = 0;
