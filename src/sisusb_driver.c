@@ -35,7 +35,6 @@
 
 #include "sisusb.h"
 
-#include "xf86RAC.h"
 #include "dixstruct.h"
 #include "shadowfb.h"
 #include "fb.h"
@@ -847,11 +846,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
        		"Found USB dongle (device %s, kernel driver %d.%d.%d)\n",
 		pScrn->chipset, pSiSUSB->sisusbversion, pSiSUSB->sisusbrevision,
 		pSiSUSB->sisusbpatchlevel);
-
-    /* Operations for which memory access is required */
-    /* USB2VGA: We never need memory or i/o access */
-    pScrn->racMemFlags = 0;
-    pScrn->racIoFlags = 0;
 
     /* Load ramdac module */
     if(!xf86LoadSubModule(pScrn, "ramdac")) {
