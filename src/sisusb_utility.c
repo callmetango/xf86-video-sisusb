@@ -34,8 +34,6 @@
 #endif
 
 #include "sisusb.h"
-#define NEED_REPLIES
-#define NEED_EVENTS
 #include <X11/X.h>
 #include "dixstruct.h"
 

@@ -141,7 +141,6 @@
 #define UNLOCK_ALWAYS		/* Always unlock the registers (should be set!) */
 
 /* Need that for SiSCtrl */
-#define NEED_REPLIES		/* ? */
 #define EXTENSION_PROC_ARGS void *
 #include "extnsionst.h" 			/* required */
 #include <X11/extensions/panoramiXproto.h>	/* required */
