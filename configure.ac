@@ -69,8 +69,6 @@ AM_CONDITIONAL(HAVE_XEXTPROTO_71, [ test "$HAVE_XEXTPROTO_71" = "yes" ])
 
 # Checks for libraries.
 
-# Checks for header files.
-AC_HEADER_STDC
 
 AC_SUBST([XORG_CFLAGS])
 AC_SUBST([moduledir])
