@@ -216,7 +216,7 @@ void SISUSBInitVideo(ScreenPtr pScreen)
 
        if(newAdaptor) size++;
 
-       newAdaptors = xalloc(size * sizeof(XF86VideoAdaptorPtr*));
+       newAdaptors = malloc(size * sizeof(XF86VideoAdaptorPtr*));
        if(newAdaptors) {
           if(num_adaptors) {
              memcpy(newAdaptors, adaptors, num_adaptors * sizeof(XF86VideoAdaptorPtr));
@@ -234,7 +234,7 @@ void SISUSBInitVideo(ScreenPtr pScreen)
     }
 
     if(newAdaptors) {
-       xfree(newAdaptors);
+       free(newAdaptors);
     }
 }
 

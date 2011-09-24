@@ -909,7 +909,7 @@ SiSUSBCtrlResetProc(ExtensionEntry* extEntry)
 {
     /* Called by CloseDownExtensions() */
     if(extEntry->extPrivate) {
-       xfree(extEntry->extPrivate);
+       free(extEntry->extPrivate);
        extEntry->extPrivate = NULL;
     }
 }
@@ -936,7 +936,7 @@ SiSUSBCtrlExtInit(ScrnInfoPtr pScrn)
 				StandardMinorOpcode))) {
          xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
 	 		"Failed to add SISCTRL extension\n");
-	 xfree(myctrl);
+	 free(myctrl);
 	 return;
       }
 

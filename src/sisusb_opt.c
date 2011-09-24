@@ -228,7 +228,7 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     xf86CollectOptions(pScrn, NULL);
 
     /* Process the options */
-    if(!(pSiSUSB->Options = xalloc(sizeof(SISUSBOptions)))) return;
+    if(!(pSiSUSB->Options = malloc(sizeof(SISUSBOptions)))) return;
 
     memcpy(pSiSUSB->Options, SISUSBOptions, sizeof(SISUSBOptions));
 

@@ -1301,10 +1301,10 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
 	 }
       }
 
-      if(!(new = xalloc(sizeof(DisplayModeRec)))) return first;
+      if(!(new = malloc(sizeof(DisplayModeRec)))) return first;
       memset(new, 0, sizeof(DisplayModeRec));
-      if(!(new->name = xalloc(10))) {
-      	 xfree(new);
+      if(!(new->name = malloc(10))) {
+      	 free(new);
 	 return first;
       }
       if(!first) first = new;

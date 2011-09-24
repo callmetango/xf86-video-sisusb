@@ -186,12 +186,12 @@ SISUSBFreeRec(ScrnInfoPtr pScrn)
     /* Just to make sure... */
     if(!pSiSUSB) return;
 
-    if(pSiSUSB->pstate) xfree(pSiSUSB->pstate);
+    if(pSiSUSB->pstate) free(pSiSUSB->pstate);
     pSiSUSB->pstate = NULL;
-    if(pSiSUSB->fonts) xfree(pSiSUSB->fonts);
+    if(pSiSUSB->fonts) free(pSiSUSB->fonts);
     pSiSUSB->fonts = NULL;
 
-    if(pSiSUSB->SiS_Pr) xfree(pSiSUSB->SiS_Pr);
+    if(pSiSUSB->SiS_Pr) free(pSiSUSB->SiS_Pr);
     pSiSUSB->SiS_Pr = NULL;
 
     if(pSiSUSB->sisusbdevopen) {
@@ -200,12 +200,12 @@ SISUSBFreeRec(ScrnInfoPtr pScrn)
     }
 
     if(pScrn->chipset) {
-       xfree(pScrn->chipset);
+       free(pScrn->chipset);
        pScrn->chipset = NULL;
     }
 
     if(pScrn->driverPrivate) {
-       xfree(pScrn->driverPrivate);
+       free(pScrn->driverPrivate);
        pScrn->driverPrivate = NULL;
     }
 }
@@ -248,7 +248,7 @@ SiSUSBCheckForUSBDongle(char *filename, SISUSBPtr pSiSUSB, int *filehandle)
 
     if((myfile = open(filename, O_RDWR, 0)) != -1) {
        if(!ioctl(myfile, SISUSB_GET_CONFIG_SIZE, &sisusbinfosize)) {
-	  if((mysisusbinfo = xalloc(sisusbinfosize))) {
+	  if((mysisusbinfo = malloc(sisusbinfosize))) {
 	     if(!ioctl(myfile, (SISUSB_GET_CONFIG | (sisusbinfosize << 16)), mysisusbinfo)) {
 		if(mysisusbinfo->sisusb_id == SISUSB_ID) {
 		   sisusbversion = (mysisusbinfo->sisusb_version  << 16) |
@@ -280,7 +280,7 @@ SiSUSBCheckForUSBDongle(char *filename, SISUSBPtr pSiSUSB, int *filehandle)
 		   retval = mysisusbinfo->sisusb_minor;
 		}
 	     }
-	     xfree(mysisusbinfo);
+	     free(mysisusbinfo);
 	     mysisusbinfo = NULL;
 	  }
        }
@@ -307,13 +307,13 @@ SiSUSBFindUSBDongle(GDevPtr dev, int *minorArray, int numDevSections, char **nam
        }
        if((p) && (*p) && (*p == '/')) {
           gotdev = 1;
-	  *nameptr = xalloc(strlen(p) + 1);
+	  *nameptr = malloc(strlen(p) + 1);
           strcpy(*nameptr, p);
 	  retval = SiSUSBCheckForUSBDongle(*nameptr, NULL, NULL);
        } else if((p) && (*p) && (sscanf(p, "%d", &i) == 1)) {
           if(i >= 0 && i <= 31) {
              gotdev = 1;
-	     *nameptr = xalloc(32);
+	     *nameptr = malloc(32);
              sprintf(*nameptr, "/dev/sisusbvga%d", i);
              retval = SiSUSBCheckForUSBDongle(*nameptr, NULL, NULL);
 	     if(retval < 0) {
@@ -324,7 +324,7 @@ SiSUSBFindUSBDongle(GDevPtr dev, int *minorArray, int numDevSections, char **nam
        }
     }
     if(!gotdev) {
-       *nameptr = xalloc(32);
+       *nameptr = malloc(32);
        for(i = 0; i < 64; i++) {
           if(i < 32) sprintf(*nameptr, "/dev/sisusbvga%d", i);
 	  else       sprintf(*nameptr, "/dev/usb/sisusbvga%d", i);
@@ -338,7 +338,7 @@ SiSUSBFindUSBDongle(GDevPtr dev, int *minorArray, int numDevSections, char **nam
     if(retval >= 0) {
        xf86Msg(X_INFO, "Found SiSUSB dongle (node %s, minor %d)\n", *nameptr, retval);
     } else if((*nameptr)) {
-       xfree(*nameptr);
+       free(*nameptr);
        *nameptr = NULL;
     }
 
@@ -401,14 +401,14 @@ SISUSBProbe(DriverPtr drv, int flags)
      */
 
     /* Allocate and initialize an array of ints for storing the minors */
-    if(!(minorArray = (int *)xalloc(numDevSections * sizeof(int)))) {
+    if(!(minorArray = (int *)malloc(numDevSections * sizeof(int)))) {
        return FALSE;
     }
     for(i = 0; i < numDevSections; i++) minorArray[i] = -1;
 
     /* Allocate an array of char ptrs for storing the device node names */
-    if(!(devnameArray = (char **)xalloc(numDevSections * sizeof(char *)))) {
-       xfree(minorArray);
+    if(!(devnameArray = (char **)malloc(numDevSections * sizeof(char *)))) {
+       free(minorArray);
        return FALSE;
     }
 
@@ -420,20 +420,20 @@ SISUSBProbe(DriverPtr drv, int flags)
        if((myminor = SiSUSBFindUSBDongle(devSections[i], minorArray, numDevSections, &nameptr)) >= 0) {
           if(!SiSUSBFindDuplicate(myminor, minorArray, numDevSections)) {
 	     minorArray[numUsed] = myminor;
-	     devnameArray[numUsed] = xalloc(strlen(nameptr) + 1);
+	     devnameArray[numUsed] = malloc(strlen(nameptr) + 1);
 	     strcpy(devnameArray[numUsed], nameptr);
              numUsed++;
 	  }
-	  xfree(nameptr);
+	  free(nameptr);
        }
     }
 
     /* Free the minor array, we don't need it anymore */
-    xfree(minorArray);
+    free(minorArray);
 
     if(numUsed <= 0) {
-       xfree(devSections);
-       xfree(devnameArray);
+       free(devSections);
+       free(devnameArray);
        return FALSE;
     }
 
@@ -470,8 +470,8 @@ SISUSBProbe(DriverPtr drv, int flags)
 
     }
 
-    xfree(devSections);
-    xfree(devnameArray);
+    free(devSections);
+    free(devnameArray);
     return foundScreen;
 }
 
@@ -622,10 +622,10 @@ SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
    if(!(nramp = xf86GetGammaRampSize(pScreen))) return;
 
    for(i=0; i<3; i++) {
-      ramp[i] = (UShort *)xalloc(nramp * sizeof(UShort));
+      ramp[i] = (UShort *)malloc(nramp * sizeof(UShort));
       if(!ramp[i]) {
-         if(ramp[0]) { xfree(ramp[0]); ramp[0] = NULL; }
-	 if(ramp[1]) { xfree(ramp[1]); ramp[1] = NULL; }
+         if(ramp[0]) { free(ramp[0]); ramp[0] = NULL; }
+	 if(ramp[1]) { free(ramp[1]); ramp[1] = NULL; }
          return;
       }
    }
@@ -685,9 +685,9 @@ SISUSBCalculateGammaRamp(ScreenPtr pScreen, ScrnInfoPtr pScrn)
 
    xf86ChangeGammaRamp(pScreen, nramp, ramp[0], ramp[1], ramp[2]);
 
-   xfree(ramp[0]);
-   xfree(ramp[1]);
-   xfree(ramp[2]);
+   free(ramp[0]);
+   free(ramp[1]);
+   free(ramp[2]);
    ramp[0] = ramp[1] = ramp[2] = NULL;
 }
 #endif
@@ -906,11 +906,11 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 	     Bool gotit = FALSE;
 
 	     if(!ioctl(fd, SISUSBFB_GET_INFO_SIZE, &sisfbinfosize)) {
-		if((mysisfbinfo = xalloc(sisfbinfosize))) {
+		if((mysisfbinfo = malloc(sisfbinfosize))) {
 		   if(!ioctl(fd, (SISUSBFB_GET_INFO | (sisfbinfosize << 16)), mysisfbinfo)) {
 		      gotit = TRUE;
 		   } else {
-		      xfree(mysisfbinfo);
+		      free(mysisfbinfo);
 		      mysisfbinfo = NULL;
 		   }
 		}
@@ -944,7 +944,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
 		   }
 	        }
-		xfree(mysisfbinfo);
+		free(mysisfbinfo);
 		mysisfbinfo = NULL;
 	     }
 	     close (fd);
@@ -1811,7 +1811,7 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 
     if(pSiSUSB->ShadowFB) {
        pSiSUSB->ShadowPitch = BitmapBytePad(pScrn->bitsPerPixel * displayWidth);
-       pSiSUSB->ShadowPtr = xalloc(pSiSUSB->ShadowPitch * height);
+       pSiSUSB->ShadowPtr = malloc(pSiSUSB->ShadowPitch * height);
        if(!(FBStart = pSiSUSB->ShadowPtr)) {
           SISUSBSaveScreen(pScreen, SCREEN_SAVER_OFF);
           SISUSBErrorLog(pScrn, "Failed to allocate shadow framebuffer\n");
@@ -1820,7 +1820,7 @@ SISUSBScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 #if X_BYTE_ORDER == X_BIG_ENDIAN
        if(pScrn->bitsPerPixel == 16) {
           /* For 16bpp, we need to swap the bytes in the framebuffer */
-          if(!(pSiSUSB->ShadowPtrSwap = xalloc(pSiSUSB->ShadowPitch * height))) {
+          if(!(pSiSUSB->ShadowPtrSwap = malloc(pSiSUSB->ShadowPitch * height))) {
 	     SISUSBSaveScreen(pScreen, SCREEN_SAVER_OFF);
              SISUSBErrorLog(pScrn, "Failed to allocate swap buffer for shadow framebuffer\n");
              return FALSE;
@@ -2238,24 +2238,24 @@ SISUSBCloseScreen(int scrnIndex, ScreenPtr pScreen)
     }
 
     if(pSiSUSB->USBCursorBuf) {
-       xfree(pSiSUSB->USBCursorBuf);
+       free(pSiSUSB->USBCursorBuf);
        pSiSUSB->USBCursorBuf = NULL;
     }
 
     if(pSiSUSB->ShadowPtr) {
-       xfree(pSiSUSB->ShadowPtr);
+       free(pSiSUSB->ShadowPtr);
        pSiSUSB->ShadowPtr = NULL;
     }
 
 #if 0
     if(pSiSUSB->PreAllocMem) {
-       xfree(pSiSUSB->PreAllocMem);
+       free(pSiSUSB->PreAllocMem);
        pSiSUSB->PreAllocMem = NULL;
     }
 #endif
 
     if(pSiSUSB->adaptor) {
-       xfree(pSiSUSB->adaptor);
+       free(pSiSUSB->adaptor);
        pSiSUSB->adaptor = NULL;
        pSiSUSB->ResetXv = pSiSUSB->ResetXvGamma = NULL;
     }
