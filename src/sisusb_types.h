@@ -51,7 +51,7 @@
 #ifndef _VGATYPES_
 #define _VGATYPES_
 
-#include <pciaccess.h>
+#include <xf86Pci.h>
 
 #ifndef FALSE
 #define FALSE   0
