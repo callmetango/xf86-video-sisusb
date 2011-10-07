@@ -926,7 +926,7 @@ SiSUSBCtrlExtInit(ScrnInfoPtr pScrn)
 
    if(!(myext = CheckExtension(SISCTRL_PROTOCOL_NAME))) {
 
-      if(!(myctrl = xcalloc(sizeof(xSiSCtrlScreenTable), 1)))
+      if(!(myctrl = calloc(sizeof(xSiSCtrlScreenTable), 1)))
          return;
 
       if(!(myext = AddExtension(SISCTRL_PROTOCOL_NAME, 0, 0,

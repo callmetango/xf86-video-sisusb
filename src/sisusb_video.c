@@ -377,7 +377,7 @@ SISUSBSetupImageVideo(ScreenPtr pScreen)
     XF86VideoAdaptorPtr adapt;
     SISUSBPortPrivPtr pPriv;
 
-    if(!(adapt = xcalloc(1, sizeof(XF86VideoAdaptorRec) +
+    if(!(adapt = calloc(1, sizeof(XF86VideoAdaptorRec) +
                             sizeof(SISUSBPortPrivRec) +
                             sizeof(DevUnion))))
     	return NULL;

@@ -1147,7 +1147,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 #endif
 
     if(pSiSUSB->HWCursor) {
-       if(!(pSiSUSB->USBCursorBuf = xcalloc(pSiSUSB->CursorSize * 4, 1))) pSiSUSB->HWCursor = FALSE;
+       if(!(pSiSUSB->USBCursorBuf = calloc(pSiSUSB->CursorSize * 4, 1))) pSiSUSB->HWCursor = FALSE;
 
        pSiSUSB->availMem -= (pSiSUSB->CursorSize * 2);
        if(pSiSUSB->OptUseColorCursor) pSiSUSB->availMem -= (pSiSUSB->CursorSize * 2);
