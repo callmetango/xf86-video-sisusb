@@ -1456,8 +1456,8 @@ SISUSBMapMem(ScrnInfoPtr pScrn)
 {
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
-    pSiSUSB->FbBase = (UChar *)pSiSUSB->FbAddress;
-    pSiSUSB->IOBase = (UChar *)pSiSUSB->IOAddress;
+    pSiSUSB->FbBase = (UChar *)(uintptr_t)pSiSUSB->FbAddress;
+    pSiSUSB->IOBase = (UChar *)(uintptr_t)pSiSUSB->IOAddress;
 
     return TRUE;
 }

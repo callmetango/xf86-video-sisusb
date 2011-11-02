@@ -672,7 +672,7 @@ SiSUSBMemCopyToVideoRam(SISUSBPtr pSiSUSB, UChar *to, UChar *from, int size)
    int num, retry = 3;
    if(pSiSUSB->sisusbfatalerror) return;
    do {
-      lseek(pSiSUSB->sisusbdev, (int)to, SEEK_SET);
+      lseek(pSiSUSB->sisusbdev, (uintptr_t)to, SEEK_SET);
       num = write(pSiSUSB->sisusbdev, from, size);
    } while((num != size) && --retry);
    if(!retry) SiSLostConnection(pSiSUSB);
@@ -958,7 +958,7 @@ void sisclearvram(SISUSBPtr pSiSUSB, UChar *where, unsigned int howmuch)
    if(pSiSUSB->sisusbfatalerror) return;
    do {
       x.operation = SUCMD_CLRSCR;
-      x.data3 = (CARD32)where;
+      x.data3 = (CARD32)(uintptr_t)where;
       x.data0 = (howmuch >> 16) & 0xff;
       x.data1 = (howmuch >> 8) & 0xff;
       x.data2 = howmuch & 0xff;
@@ -990,7 +990,7 @@ void SIS_MMIO_OUT8(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD8 va
     int num, retry = 3;
     if(pSiSUSB->sisusbfatalerror) return;
     do {
-       lseek(pSiSUSB->sisusbdev, (int)base + offset, SEEK_SET);
+       lseek(pSiSUSB->sisusbdev, (uintptr_t)base + offset, SEEK_SET);
        num = write(pSiSUSB->sisusbdev, &val, 1);
     } while((num != 1) && --retry);
     if(!retry) SiSLostConnection(pSiSUSB);
@@ -1002,7 +1002,7 @@ void SIS_MMIO_OUT16(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD16 
     CARD16 buf = sisusb_cpu_to_le16(val);
     if(pSiSUSB->sisusbfatalerror) return;
     do {
-       lseek(pSiSUSB->sisusbdev, (int)base + offset, SEEK_SET);
+       lseek(pSiSUSB->sisusbdev, (uintptr_t)base + offset, SEEK_SET);
        num = write(pSiSUSB->sisusbdev, &buf, 2);
     } while((num != 2) && --retry);
     if(!retry) SiSLostConnection(pSiSUSB);
@@ -1014,7 +1014,7 @@ void SIS_MMIO_OUT32(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset, CARD32 
     CARD32 buf = sisusb_cpu_to_le32(val);
     if(pSiSUSB->sisusbfatalerror) return;
     do {
-       lseek(pSiSUSB->sisusbdev, (int)base + offset, SEEK_SET);
+       lseek(pSiSUSB->sisusbdev, (uintptr_t)base + offset, SEEK_SET);
        num = write(pSiSUSB->sisusbdev, &buf, 4);
     } while((num != 4) && --retry);
     if(!retry) SiSLostConnection(pSiSUSB);
@@ -1026,7 +1026,7 @@ CARD8 SIS_MMIO_IN8(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset)
     CARD8 tmp;
     if(pSiSUSB->sisusbfatalerror) return 0;
     do {
-       lseek(pSiSUSB->sisusbdev, (int)base + offset, SEEK_SET);
+       lseek(pSiSUSB->sisusbdev, (uintptr_t)base + offset, SEEK_SET);
        num = read(pSiSUSB->sisusbdev, &tmp, 1);
     } while((num != 1) && --retry);
     if(!retry) SiSLostConnection(pSiSUSB);
@@ -1039,7 +1039,7 @@ CARD16 SIS_MMIO_IN16(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset)
     CARD16 tmp;
     if(pSiSUSB->sisusbfatalerror) return 0;
     do {
-       lseek(pSiSUSB->sisusbdev, (int)base + offset, SEEK_SET);
+       lseek(pSiSUSB->sisusbdev, (uintptr_t)base + offset, SEEK_SET);
        num = read(pSiSUSB->sisusbdev, &tmp, 2);
     } while((num != 2) && --retry);
     if(!retry) SiSLostConnection(pSiSUSB);
@@ -1052,7 +1052,7 @@ CARD32 SIS_MMIO_IN32(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset)
     CARD32 tmp;
     if(pSiSUSB->sisusbfatalerror) return 0;
     do {
-       lseek(pSiSUSB->sisusbdev, (int)base + offset, SEEK_SET);
+       lseek(pSiSUSB->sisusbdev, (uintptr_t)base + offset, SEEK_SET);
        num = read(pSiSUSB->sisusbdev, &tmp, 4);
     } while((num != 4) && --retry);
     if(!retry) SiSLostConnection(pSiSUSB);
