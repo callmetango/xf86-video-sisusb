@@ -95,7 +95,7 @@ typedef unsigned char BOOLEAN;
 
 #define SISIOMEMTYPE
 
-typedef IOADDRESS SISIOADDRESS;
+typedef unsigned long SISIOADDRESS;
 
 typedef enum _SIS_CHIP_TYPE {
     SIS_VGALegacy = 0,

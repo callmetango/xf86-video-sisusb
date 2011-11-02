@@ -77,11 +77,11 @@
 
 #define SIS315H
 
-#define OutPortByte(p,v) outSISREG((IOADDRESS)(p),(CARD8)(v))
-#define OutPortWord(p,v) outSISREGW((IOADDRESS)(p),(CARD16)(v))
-#define OutPortLong(p,v) outSISREGL((IOADDRESS)(p),(CARD32)(v))
-#define InPortByte(p)    inSISREG((IOADDRESS)(p))
-#define InPortWord(p)    inSISREGW((IOADDRESS)(p))
-#define InPortLong(p)    inSISREGL((IOADDRESS)(p))
+#define OutPortByte(p,v) outSISREG((unsigned long)(p),(CARD8)(v))
+#define OutPortWord(p,v) outSISREGW((unsigned long)(p),(CARD16)(v))
+#define OutPortLong(p,v) outSISREGL((unsigned long)(p),(CARD32)(v))
+#define InPortByte(p)    inSISREG((unsigned long)(p))
+#define InPortWord(p)    inSISREGW((unsigned long)(p))
+#define InPortLong(p)    inSISREGL((unsigned long)(p))
 
 #endif  /* _SISUSB_OSDEF_H_ */

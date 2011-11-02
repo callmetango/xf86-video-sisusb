@@ -739,7 +739,7 @@ typedef struct {
     Bool		skipswitchcheck;
     ULong		VBFlagsInit;
     DisplayModePtr	currentModeLast;
-    IOADDRESS		MyPIOOffset;
+    unsigned long		MyPIOOffset;
 
     char		messagebuffer[64];
     unsigned int	VGAMapSize;		/* SiSVGA stuff */
