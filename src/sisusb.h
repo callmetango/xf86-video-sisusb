@@ -113,6 +113,8 @@
 #include <X11/extensions/Xv.h>
 #endif
 
+#include "compat-api.h"
+
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 12
 #define _swapl(x, n) swapl(x,n)
 #define _swaps(x, n) swaps(x,n)

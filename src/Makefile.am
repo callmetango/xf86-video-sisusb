@@ -51,4 +51,5 @@ sisusb_drv_la_SOURCES = \
          sisusb_vga.c \
          sisusb_video.c \
          sisusb_video.h \
-         sisusb_videostr.h
+         sisusb_videostr.h \
+         compat-api.h

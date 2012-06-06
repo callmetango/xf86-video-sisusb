@@ -196,7 +196,7 @@ SISUSBResetXvGamma(ScrnInfoPtr pScrn)
 
 void SISUSBInitVideo(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     XF86VideoAdaptorPtr *adaptors, *newAdaptors = NULL;
     XF86VideoAdaptorPtr newAdaptor = NULL;
     int num_adaptors;
@@ -372,7 +372,7 @@ set_maxencoding(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
 static XF86VideoAdaptorPtr
 SISUSBSetupImageVideo(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     XF86VideoAdaptorPtr adapt;
     SISUSBPortPrivPtr pPriv;
@@ -1477,7 +1477,7 @@ SISUSBAllocateOverlayMemory(
       xf86FreeOffscreenLinear(linear);
    }
 
-   pScreen = screenInfo.screens[pScrn->scrnIndex];
+   pScreen = xf86ScrnToScreen(pScrn);
 
    new_linear = xf86AllocateOffscreenLinear(pScreen, size, 8,
                                             NULL, NULL, NULL);

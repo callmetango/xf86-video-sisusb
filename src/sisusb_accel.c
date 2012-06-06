@@ -60,7 +60,7 @@ SiSUSBInitializeAccelerator(ScrnInfoPtr pScrn)
 Bool
 SiSUSBAccelInit(ScreenPtr pScreen)
 {
-	ScrnInfoPtr	pScrn = xf86Screens[pScreen->myNum];
+	ScrnInfoPtr	pScrn = xf86ScreenToScrn(pScreen);
 	SISUSBPtr	pSiSUSB = SISUSBPTR(pScrn);
 	int		topFB, reservedFbSize, usableFbSize;
 	BoxRec		Avail;

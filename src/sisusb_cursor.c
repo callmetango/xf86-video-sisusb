@@ -156,7 +156,7 @@ SiSUSBLoadCursorImage(ScrnInfoPtr pScrn, UChar *src)
 static Bool
 SiSUSBUseHWCursor(ScreenPtr pScreen, CursorPtr pCurs)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     DisplayModePtr mode = pSiSUSB->CurrentLayout.mode;
 
@@ -172,7 +172,7 @@ SiSUSBUseHWCursor(ScreenPtr pScreen, CursorPtr pCurs)
 static Bool
 SiSUSBUseHWCursorARGB(ScreenPtr pScreen, CursorPtr pCurs)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     DisplayModePtr mode = pSiSUSB->CurrentLayout.mode;
 
@@ -261,7 +261,7 @@ static void SiSUSBLoadCursorImageARGB(ScrnInfoPtr pScrn, CursorPtr pCurs)
 Bool
 SiSUSBHWCursorInit(ScreenPtr pScreen)
 {
-    ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     xf86CursorInfoPtr infoPtr;
 

@@ -71,20 +71,20 @@ static const struct _sis_vrate {
 static void	SISUSBIdentify(int flags);
 static Bool	SISUSBProbe(DriverPtr drv, int flags);
 static Bool	SISUSBPreInit(ScrnInfoPtr pScrn, int flags);
-static Bool	SISUSBScreenInit(int Index, ScreenPtr pScreen, int argc, char **argv);
-static Bool	SISUSBEnterVT(int scrnIndex, int flags);
-static void	SISUSBLeaveVT(int scrnIndex, int flags);
-static Bool	SISUSBCloseScreen(int scrnIndex, ScreenPtr pScreen);
+static Bool	SISUSBScreenInit(SCREEN_INIT_ARGS_DECL);
+static Bool	SISUSBEnterVT(VT_FUNC_ARGS_DECL);
+static void	SISUSBLeaveVT(VT_FUNC_ARGS_DECL);
+static Bool	SISUSBCloseScreen(CLOSE_SCREEN_ARGS_DECL);
 static Bool	SISUSBSaveScreen(ScreenPtr pScreen, int mode);
-static Bool	SISUSBSwitchMode(int scrnIndex, DisplayModePtr mode, int flags);
-static void	SISUSBAdjustFrame(int scrnIndex, int x, int y, int flags);
+static Bool	SISUSBSwitchMode(SWITCH_MODE_ARGS_DECL);
+static void	SISUSBAdjustFrame(ADJUST_FRAME_ARGS_DECL);
 #ifdef SISUSB_HAVE_DRIVER_FUNC
 static Bool	SISUSBDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer p);
 #endif
 
 /* Optional functions */
-static void       SISUSBFreeScreen(int scrnIndex, int flags);
-static ModeStatus SISUSBValidMode(int scrnIndex, DisplayModePtr mode,
+static void       SISUSBFreeScreen(FREE_SCREEN_ARGS_DECL);
+static ModeStatus SISUSBValidMode(SCRN_ARG_TYPE arg, DisplayModePtr mode,
 				Bool verbose, int flags);
 
 /* Internally used functions */
