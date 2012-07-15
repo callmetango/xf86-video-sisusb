@@ -86,7 +86,7 @@
 #include "xf86.h"
 #include "xf86Cursor.h"
 #include "xf86cmap.h"
-#include "xaa.h"
+#include "xf86fbman.h"
 
 #define SISUSB_HaveDriverFuncs 0
 
