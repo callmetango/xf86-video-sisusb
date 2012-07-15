@@ -113,6 +113,8 @@
 #include <X11/extensions/Xv.h>
 #endif
 
+#include "fb.h"
+
 #include "compat-api.h"
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 12

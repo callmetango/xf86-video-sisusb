@@ -37,7 +37,6 @@
 
 #include "dixstruct.h"
 #include "shadowfb.h"
-#include "fb.h"
 #include "micmap.h"
 #include "mipointer.h"
 #include "mibstore.h"
