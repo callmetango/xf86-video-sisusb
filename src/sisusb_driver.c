@@ -39,7 +39,6 @@
 #include "shadowfb.h"
 #include "micmap.h"
 #include "mipointer.h"
-#include "mibstore.h"
 
 #include "sisusb_regs.h"
 #include "sisusb_dac.h"
@@ -1907,7 +1906,6 @@ SISUSBScreenInit(SCREEN_INIT_ARGS_DECL)
     /* Initialize the accelerators */
     SiSUSBAccelInit(pScreen);
 
-    miInitializeBackingStore(pScreen);
     xf86SetBackingStore(pScreen);
 
     /* NO SilkenMouse. Never. Ever. */
