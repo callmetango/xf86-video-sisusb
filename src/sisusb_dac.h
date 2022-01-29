@@ -31,7 +31,7 @@
 int  SiSUSB_compute_vclk(int Clock, int *out_n, int *out_dn, int *out_div,
 	     		int *out_sbit, int *out_scale);
 void SISUSBDACPreInit(ScrnInfoPtr pScrn);
-void SISUSBLoadPalette(ScrnInfoPtr pScrn, int numColors, int *indicies,
+void SISUSBLoadPalette(ScrnInfoPtr pScrn, int numColors, int *indices,
 		        LOCO *colors, VisualPtr pVisual);
 void SiSUSBCalcClock(ScrnInfoPtr pScrn, int clock, int max_VLD,
                         unsigned int *vclk);

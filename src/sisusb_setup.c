@@ -84,7 +84,7 @@ sis315USBSetup(ScrnInfoPtr pScrn)
        pScrn->videoRam <<= 1;
     }
 
-    /* If DDR asymetric -> mem * 1,5 */
+    /* If DDR asymmetric -> mem * 1,5 */
     if(config1 == 0x02) pScrn->videoRam += pScrn->videoRam/2;
 
     xf86DrvMsg(pScrn->scrnIndex, X_PROBED,

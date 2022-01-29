@@ -2386,7 +2386,7 @@ SiSUSBEnableTurboQueue(ScrnInfoPtr pScrn)
 	      /* Disable queue flipping */
 	      inSISIDXREG(pSiSUSB, SISCR, 0x55, tempCR55) ;
     	      andSISIDXREG(pSiSUSB, SISCR, 0x55, 0x33) ;
-	      /* Syncronous reset for Command Queue */
+	      /* Synchronous reset for Command Queue */
 	      outSISIDXREG(pSiSUSB, SISSR, 0x26, 0x01);
 	      SIS_MMIO_OUT32(pSiSUSB, pSiSUSB->IOBase, 0x85c4, 0);
 	      /* Enable VRAM Command Queue mode */
@@ -2413,7 +2413,7 @@ SiSUSBEnableTurboQueue(ScrnInfoPtr pScrn)
 	      /* For MMIO */
 	      /* Set Command Queue Threshold to max value 11111b */
 	      outSISIDXREG(pSiSUSB,SISSR, 0x27, 0x1F);
-	      /* Syncronous reset for Command Queue */
+	      /* Synchronous reset for Command Queue */
 	      outSISIDXREG(pSiSUSB,SISSR, 0x26, 0x01);
 	      /* Do some magic (cp readport to writeport) */
 	      temp = SIS_MMIO_IN32(pSiSUSB, pSiSUSB->IOBase, 0x85C8);

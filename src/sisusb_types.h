@@ -128,7 +128,7 @@ typedef enum _SIS_CHIP_TYPE {
     MAX_SIS_CHIP
 } SIS_CHIP_TYPE;
 
-/* Addtional IOCTLs for communication sisfb <> X driver        */
+/* Additional IOCTLs for communication sisfb <> X driver        */
 /* If changing this, sisfb.h must also be changed (for sisfb) */
 
 /* ioctl for identifying and giving some info (esp. memory heap start) */
