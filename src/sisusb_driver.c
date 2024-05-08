@@ -168,7 +168,7 @@ SISUSBGetRec(ScrnInfoPtr pScrn)
      */
     if(pScrn->driverPrivate != NULL) return TRUE;
 
-    pScrn->driverPrivate = xnfcalloc(sizeof(SISUSBRec), 1);
+    pScrn->driverPrivate = XNFcallocarray(sizeof(SISUSBRec), 1);
 
     /* Initialise it to 0 */
     memset(pScrn->driverPrivate, 0, sizeof(SISUSBRec));
@@ -980,7 +980,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 
     /* Allocate SiS_Private (for mode switching code) and initialize it */
 
-    if(!(pSiSUSB->SiS_Pr = xnfcalloc(sizeof(SiS_Private), 1))) {
+    if(!(pSiSUSB->SiS_Pr = XNFcallocarray(sizeof(SiS_Private), 1))) {
        SISUSBErrorLog(pScrn, "Could not allocate memory for SiS_Pr structure\n");
        SISUSBFreeRec(pScrn);
        return FALSE;
@@ -1284,7 +1284,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
      * Setup the ClockRanges, which describe what clock ranges are available,
      * and what sort of modes they can be used for.
      */
-    clockRanges = xnfcalloc(sizeof(ClockRange), 1);
+    clockRanges = XNFcallocarray(sizeof(ClockRange), 1);
     clockRanges->next = NULL;
     clockRanges->minClock = pSiSUSB->MinClock;
     clockRanges->maxClock = pSiSUSB->MaxClock;
