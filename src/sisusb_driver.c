@@ -1949,11 +1949,9 @@ SISUSBScreenInit(SCREEN_INIT_ARGS_DECL)
     pSiSUSB->xv_sisdirectunlocked = 0;
 
 #ifdef SIS_GLOBAL_ENABLEXV
-#if (XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,0)) || (defined(XvExtension))
     if(!pSiSUSB->NoXvideo) {
        SISUSBInitVideo(pScreen);
     }
-#endif
 #endif
 
     /* Wrap some funcs and setup remaining SD flags */

@@ -561,36 +561,6 @@ SISUSBSetupImageVideo(ScreenPtr pScreen)
 }
 
 #ifdef SIS_ENABLEXV
-#if XF86_VERSION_CURRENT < XF86_VERSION_NUMERIC(4,3,99,3)
-static Bool
-RegionsEqual(RegionPtr A, RegionPtr B)
-{
-    int *dataA, *dataB;
-    int num;
-
-    num = REGION_NUM_RECTS(A);
-    if(num != REGION_NUM_RECTS(B))
-    return FALSE;
-
-    if((A->extents.x1 != B->extents.x1) ||
-       (A->extents.x2 != B->extents.x2) ||
-       (A->extents.y1 != B->extents.y1) ||
-       (A->extents.y2 != B->extents.y2))
-    return FALSE;
-
-    dataA = (int*)REGION_RECTS(A);
-    dataB = (int*)REGION_RECTS(B);
-
-    while(num--) {
-      if((dataA[0] != dataB[0]) || (dataA[1] != dataB[1]))
-        return FALSE;
-      dataA += 2;
-      dataB += 2;
-    }
-
-    return TRUE;
-}
-#endif
 #endif
 
 #if 0
@@ -1654,11 +1624,7 @@ SISUSBPutImage(
    /* update cliplist */
    if(pPriv->autopaintColorKey &&
       (pPriv->grabbedByV4L ||
-#if XF86_VERSION_CURRENT < XF86_VERSION_NUMERIC(4,3,99,3)
-       (!RegionsEqual(&pPriv->clip, clipBoxes)) ||
-#else
        (!REGION_EQUAL(pScrn->pScreen, &pPriv->clip, clipBoxes)) ||
-#endif
        (pPriv->PrevOverlay != pPriv->NoOverlay))) {
       /* We always paint the colorkey for V4L */
       if(!pPriv->grabbedByV4L) {

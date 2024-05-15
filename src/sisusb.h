@@ -92,21 +92,14 @@
 
 #include "xorgVersion.h"
 #define SISUSBMYSERVERNAME "X.org"
-#ifndef XF86_VERSION_NUMERIC
-#define XF86_VERSION_NUMERIC(major,minor,patch,snap) \
-	(((major) * 10000000) + ((minor) * 100000) + ((patch) * 1000) + snap)
-#define XF86_VERSION_CURRENT XF86_VERSION_NUMERIC(4,3,99,902)
-#endif
 #ifdef HaveDriverFuncs
 #define SISUSB_HAVE_DRIVER_FUNC
 #undef  SISUSB_HaveDriverFuncs
 #define SISUSB_HaveDriverFuncs HaveDriverFuncs
 #endif
 
-#if (XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,3,99,0)) || (defined(XvExtension))
 #include "xf86xv.h"
 #include <X11/extensions/Xv.h>
-#endif
 
 #include "fb.h"
 
@@ -152,10 +145,7 @@
 #include "extnsionst.h" 			/* required */
 #include <X11/extensions/panoramiXproto.h>	/* required */
 
-#undef SISGAMMARAMP
-#if XORG_VERSION_CURRENT >= XORG_VERSION_NUMERIC(6,8,99,13,0) || XORG_VERSION_CURRENT < XORG_VERSION_NUMERIC(4,0,0,0,0)
 #define SISGAMMARAMP		/* Driver can set gamma ramp; requires additional symbols in xf86sym.h */
-#endif
 
 #undef SIS_GLOBAL_ENABLEXV
 #if defined(XV_SD_DEPRECATED) || defined(SIS_ENABLEXV)

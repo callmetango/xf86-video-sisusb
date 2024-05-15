@@ -287,11 +287,7 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
     pSiSUSB->HideHWCursor = FALSE;
     pSiSUSB->HWCursorIsVisible = FALSE;
 
-#if XF86_VERSION_CURRENT < XF86_VERSION_NUMERIC(4,2,99,0)
-    pSiSUSB->OptUseColorCursor = 0;
-#else
     pSiSUSB->OptUseColorCursor = 1;
-#endif
 
     /* Collect the options */
 
@@ -343,7 +339,6 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
      * Enable/disable color hardware cursor
      *
      */
-#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,2,99,0)
 #ifdef ARGB_CURSOR
 #ifdef SIS_ARGB_CURSOR
     if(pSiSUSB->HWCursor) {
@@ -354,7 +349,6 @@ SiSUSBOptions(ScrnInfoPtr pScrn)
        xf86DrvMsg(pScrn->scrnIndex, from, "Color HW cursor is %s\n",
                     pSiSUSB->OptUseColorCursor ? enabledstr : disabledstr);
     }
-#endif
 #endif
 #endif
 
