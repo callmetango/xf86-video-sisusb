@@ -88,15 +88,8 @@
 #include "xf86cmap.h"
 #include "xf86fbman.h"
 
-#define SISUSB_HaveDriverFuncs 0
-
 #include "xorgVersion.h"
 #define SISUSBMYSERVERNAME "X.org"
-#ifdef HaveDriverFuncs
-#define SISUSB_HAVE_DRIVER_FUNC
-#undef  SISUSB_HaveDriverFuncs
-#define SISUSB_HaveDriverFuncs HaveDriverFuncs
-#endif
 
 #include "xf86xv.h"
 #include <X11/extensions/Xv.h>

@@ -79,11 +79,8 @@ DriverRec SISUSB = {
     SISUSBProbe,
     SISUSBAvailableOptions,
     NULL,
-    0
-#ifdef SISUSB_HAVE_DRIVER_FUNC
-     ,
+    0,
     SISUSBDriverFunc
-#endif
 };
 
 static SymTabRec SISUSBChipsets[] = {
@@ -121,7 +118,7 @@ sisusbSetup(pointer module, pointer opts, int *errmaj, int *errmin)
 
     if(!setupDone) {
        setupDone = TRUE;
-       xf86AddDriver(&SISUSB, module, SISUSB_HaveDriverFuncs);
+       xf86AddDriver(&SISUSB, module, HaveDriverFuncs);
        return (pointer)TRUE;
     }
 
@@ -138,7 +135,6 @@ SISUSBIdentify(int flags)
     xf86PrintChipsets(SISUSB_NAME, "driver for SiSUSB chipsets", SISUSBChipsets);
 }
 
-#ifdef SISUSB_HAVE_DRIVER_FUNC
 static Bool
 SISUSBDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr)
 {
@@ -153,7 +149,6 @@ SISUSBDriverFunc(ScrnInfoPtr pScrn, xorgDriverFuncOp op, pointer ptr)
 	return FALSE;
     }
 }
-#endif
 
 static Bool
 SISUSBGetRec(ScrnInfoPtr pScrn)
