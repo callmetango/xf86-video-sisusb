@@ -106,13 +106,6 @@
 #define _swaps(x, n) swaps(x)
 #endif
 
-/* Platform/architecture related definitions: */
-
-#undef SIS_PC_PLATFORM
-#undef SIS_USE_BIOS_SCRATCH
-#undef SIS_NEED_MAP_IOP
-#undef SISUSEDEVPORT
-
 /* Our #includes: Require the arch/platform dependent #defines above */
 
 #include "sisusb_osdef.h"
