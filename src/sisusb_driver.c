@@ -101,11 +101,7 @@ static XF86ModuleVersionInfo sisVersRec =
     MODULEVENDORSTRING,
     MODINFOSTRING1,
     MODINFOSTRING2,
-#ifdef XORG_VERSION_CURRENT
     XORG_VERSION_CURRENT,
-#else
-    XF86_VERSION_CURRENT,
-#endif
     SISUSB_MAJOR_VERSION, SISUSB_MINOR_VERSION, SISUSB_PATCHLEVEL,
     ABI_CLASS_VIDEODRV,         /* This is a video driver */
     ABI_VIDEODRV_VERSION,
@@ -782,13 +778,8 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
         "SiSUSB driver (%d/%02d/%02d-%d, compiled for " SISUSBMYSERVERNAME " %d.%d.%d.%d)\n",
 	SISUSBDRIVERVERSIONYEAR + 2000, SISUSBDRIVERVERSIONMONTH,
 	SISUSBDRIVERVERSIONDAY, SISUSBDRIVERREVISION,
-#ifdef XORG_VERSION_CURRENT
  	XORG_VERSION_MAJOR, XORG_VERSION_MINOR,
 	XORG_VERSION_PATCH, XORG_VERSION_SNAP
-#else
-	XF86_VERSION_MAJOR, XF86_VERSION_MINOR,
-	XF86_VERSION_PATCH, XF86_VERSION_SNAP
-#endif
 	);
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 	"Copyright (C) 2001-2005 Thomas Winischhofer <thomas@winischhofer.net>\n");
@@ -797,20 +788,11 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     xf86DrvMsg(pScrn->scrnIndex, X_INFO,
 	"*** for documentation and updates.\n");
 
-#ifdef XORG_VERSION_CURRENT
 #if 0  /* no prototype yet */
     if(xorgGetVersion() != XORG_VERSION_CURRENT) {
        xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
          "This driver binary is not compiled for this version of " SISUSBMYSERVERNAME "\n");
     }
-#endif
-#else
-#if XF86_VERSION_CURRENT >= XF86_VERSION_NUMERIC(4,2,99,0)
-    if(xf86GetVersion() != XF86_VERSION_CURRENT) {
-       xf86DrvMsg(pScrn->scrnIndex, X_WARNING,
-         "This driver binary is not compiled for this version of " SISUSBMYSERVERNAME "\n");
-    }
-#endif
 #endif
 
     /* Allocate the SISUSBRec driverPrivate */
