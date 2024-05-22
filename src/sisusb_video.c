@@ -434,11 +434,7 @@ SISUSBSetupImageVideo(ScreenPtr pScreen)
     pPriv->is340       = FALSE;
 
     /* gotta uninit this someplace */
-#if defined(REGION_NULL)
     REGION_NULL(pScreen, &pPriv->clip);
-#else
-    REGION_INIT(pScreen, &pPriv->clip, NullBox, 0);
-#endif
 
     pSiSUSB->adaptor = adapt;
 
