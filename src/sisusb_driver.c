@@ -69,10 +69,7 @@ static int pix24bpp = 0;
  * an upper-case version of the driver name.
  */
 
-#ifdef _X_EXPORT
-_X_EXPORT
-#endif
-DriverRec SISUSB = {
+_X_EXPORT DriverRec SISUSB = {
     SISUSB_CURRENT_VERSION,
     SISUSB_DRIVER_NAME,
     SISUSBIdentify,
@@ -106,10 +103,7 @@ static XF86ModuleVersionInfo sisVersRec =
     {0,0,0,0}
 };
 
-#ifdef _X_EXPORT
-_X_EXPORT
-#endif
-XF86ModuleData sisusbModuleData = { &sisVersRec, sisusbSetup, NULL };
+_X_EXPORT XF86ModuleData sisusbModuleData = { &sisVersRec, sisusbSetup, NULL };
 
 pointer
 sisusbSetup(pointer module, pointer opts, int *errmaj, int *errmin)
