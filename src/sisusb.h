@@ -98,14 +98,6 @@
 
 #include "compat-api.h"
 
-#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 12
-#define _swapl(x, n) swapl(x,n)
-#define _swaps(x, n) swaps(x,n)
-#else
-#define _swapl(x, n) swapl(x)
-#define _swaps(x, n) swaps(x)
-#endif
-
 /* Our #includes: Require the arch/platform dependent #defines above */
 
 #include "sisusb_osdef.h"
@@ -781,6 +773,3 @@ extern CARD32 SIS_MMIO_IN32(SISUSBPtr pSiSUSB, UChar *base, unsigned int offset)
 #define SIS_USEIOCTL
 
 #endif  /* _SISUSB_H_ */
-
-
-
