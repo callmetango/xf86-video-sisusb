@@ -1609,7 +1609,6 @@ SISUSBBridgeRestore(ScrnInfoPtr pScrn)
 static void
 SISUSBBlockHandler(BLOCKHANDLER_ARGS_DECL)
 {
-    SCREEN_PTR(arg);
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
@@ -1620,7 +1619,7 @@ SISUSBBlockHandler(BLOCKHANDLER_ARGS_DECL)
 	     pSiSUSB->sisusberrorsleepcount = 0;
 	     pSiSUSB->sisusbfatalerror = 0;
 	     pSiSUSB->sisusbdevopen = TRUE;
-	     (*pScrn->SwitchMode)(SWITCH_MODE_ARGS(pScrn, pScrn->currentMode));
+	     (*pScrn->SwitchMode)(pScrn, pScrn->currentMode);
 	     pSiSUSB->ShBoxcount = 1;
 	     pSiSUSB->ShXmin = pSiSUSB->ShYmin = 0;
 	     pSiSUSB->ShXmax = pScrn->virtualX;
@@ -1655,7 +1654,7 @@ SISUSBBlockHandler(BLOCKHANDLER_ARGS_DECL)
  * depth, bitsPerPixel)
  */
 static Bool
-SISUSBScreenInit(SCREEN_INIT_ARGS_DECL)
+SISUSBScreenInit(ScreenPtr pScreen, int argc, char **argv)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
@@ -1753,7 +1752,7 @@ SISUSBScreenInit(SCREEN_INIT_ARGS_DECL)
     SISUSBSaveScreen(pScreen, SCREEN_SAVER_ON);
 
     /* Set the viewport */
-    SISUSBAdjustFrame(ADJUST_FRAME_ARGS(pScrn, pScrn->frameX0, pScrn->frameY0));
+    SISUSBAdjustFrame(pScrn, pScrn->frameX0, pScrn->frameY0);
 
     /* Reset visual list. */
     miClearVisualTypes();
@@ -2010,13 +2009,12 @@ SISUSBScreenInit(SCREEN_INIT_ARGS_DECL)
 
 /* Usually mandatory */
 Bool
-SISUSBSwitchMode(SWITCH_MODE_ARGS_DECL)
+SISUSBSwitchMode(ScrnInfoPtr pScrn, DisplayModePtr mode)
 {
-    SCRN_INFO_PTR(arg);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
     if(!pSiSUSB->skipswitchcheck) {
-       if(SISUSBValidMode(arg, mode, TRUE, 0) != MODE_OK) {
+       if(SISUSBValidMode(pScrn, mode, TRUE, 0) != MODE_OK) {
           return FALSE;
        }
     }
@@ -2055,9 +2053,8 @@ SISUSBSetStartAddressCRT1(SISUSBPtr pSiSUSB, ULong base)
  * Usually mandatory
  */
 void
-SISUSBAdjustFrame(ADJUST_FRAME_ARGS_DECL)
+SISUSBAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
 {
-    SCRN_INFO_PTR(arg);
     SISUSBPtr        pSiSUSB = SISUSBPTR(pScrn);
     ULong base;
 
@@ -2096,9 +2093,8 @@ SISUSBAdjustFrame(ADJUST_FRAME_ARGS_DECL)
  * Mandatory!
  */
 static Bool
-SISUSBEnterVT(VT_FUNC_ARGS_DECL)
+SISUSBEnterVT(ScrnInfoPtr pScrn)
 {
-    SCRN_INFO_PTR(arg);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
     SiSUSB_SiSFB_Lock(pScrn, TRUE);
@@ -2114,7 +2110,7 @@ SISUSBEnterVT(VT_FUNC_ARGS_DECL)
        return FALSE;
     }
 
-    SISUSBAdjustFrame(ADJUST_FRAME_ARGS(pScrn, pScrn->frameX0, pScrn->frameY0));
+    SISUSBAdjustFrame(pScrn, pScrn->frameX0, pScrn->frameY0);
 
     if(pSiSUSB->ResetXv) {
        (pSiSUSB->ResetXv)(pScrn);
@@ -2129,9 +2125,8 @@ SISUSBEnterVT(VT_FUNC_ARGS_DECL)
  * Mandatory!
  */
 static void
-SISUSBLeaveVT(VT_FUNC_ARGS_DECL)
+SISUSBLeaveVT(ScrnInfoPtr pScrn)
 {
-    SCRN_INFO_PTR(arg);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
     if(pSiSUSB->CursorInfoPtr) {
@@ -2163,7 +2158,7 @@ SISUSBLeaveVT(VT_FUNC_ARGS_DECL)
  * Mandatory!
  */
 static Bool
-SISUSBCloseScreen(CLOSE_SCREEN_ARGS_DECL)
+SISUSBCloseScreen(ScreenPtr pScreen)
 {
     ScrnInfoPtr pScrn = xf86ScreenToScrn(pScreen);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
@@ -2239,7 +2234,7 @@ SISUSBCloseScreen(CLOSE_SCREEN_ARGS_DECL)
 
     pScreen->CloseScreen = pSiSUSB->CloseScreen;
 
-    return(*pScreen->CloseScreen)(CLOSE_SCREEN_ARGS);
+    return(*pScreen->CloseScreen)(pScreen);
 }
 
 
@@ -2247,9 +2242,8 @@ SISUSBCloseScreen(CLOSE_SCREEN_ARGS_DECL)
 
 /* Optional */
 static void
-SISUSBFreeScreen(FREE_SCREEN_ARGS_DECL)
+SISUSBFreeScreen(ScrnInfoPtr pScrn)
 {
-    SCRN_INFO_PTR(arg);
     SISUSBFreeRec(pScrn);
 }
 
@@ -2257,9 +2251,8 @@ SISUSBFreeScreen(FREE_SCREEN_ARGS_DECL)
 /* Checks if a mode is suitable for the selected chipset. */
 
 static ModeStatus
-SISUSBValidMode(SCRN_ARG_TYPE arg, DisplayModePtr mode, Bool verbose, int flags)
+SISUSBValidMode(ScrnInfoPtr pScrn, DisplayModePtr mode, Bool verbose, int flags)
 {
-    SCRN_INFO_PTR(arg);
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
     if(SiSUSB_CheckModeCRT1(pScrn, mode, pSiSUSB->VBFlags, pSiSUSB->HaveCustomModes) < 0x14)
