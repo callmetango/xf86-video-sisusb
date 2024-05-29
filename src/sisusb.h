@@ -715,17 +715,6 @@ typedef struct {
 
     ExtensionEntry	*SiSCtrlExtEntry;
     char		devsectname[32];
-
-    /* accel wrapper */
-#if 0
-    int 		SiSUSBGCIndex;	/* init -1 */
-    CloseScreenProcPtr  AWCloseScreen;
-    CreateGCProcPtr	AWCreateGC;
-    Bool		AccelNeedSync;
-    Bool 		IgnoreRefresh;
-    int			PreAllocSize;
-    void *		PreAllocMem;
-#endif
 } SISUSBRec, *SISUSBPtr;
 
 extern void  sisusbSaveUnlockExtRegisterLock(SISUSBPtr pSiS, UChar *reg1, UChar *reg2);
@@ -736,9 +725,6 @@ extern void  SiSUSBSetup(ScrnInfoPtr pScrn);
 extern void  SISUSBVGAPreInit(ScrnInfoPtr pScrn);
 extern Bool  SiSUSBHWCursorInit(ScreenPtr pScreen);
 extern Bool  SiSUSBAccelInit(ScreenPtr pScreen);
-#if 0
-extern void  SiSUSBSync(ScrnInfoPtr pScrn);
-#endif
 #ifdef SIS_GLOBAL_ENABLEXV
 extern void  SISUSBInitVideo(ScreenPtr pScreen);
 #endif

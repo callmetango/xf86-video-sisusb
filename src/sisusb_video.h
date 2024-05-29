@@ -391,12 +391,7 @@ typedef struct {
     CARD16  oldLine, oldtop;
 
     CARD8   (*VBlankActiveFunc)(SISUSBPtr, SISUSBPortPrivPtr);
-#if 0
-    CARD32  (*GetScanLineFunc)(SISUSBPtr pSiSUSB);
-#endif
 
 } SISUSBOverlayRec, *SISUSBOverlayPtr;
 
 #endif
-
-

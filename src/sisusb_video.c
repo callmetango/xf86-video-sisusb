@@ -61,17 +61,6 @@
  ****************************************************************************/
 
 #ifdef SIS_ENABLEXV
-#if 0
-static CARD32 _sisread(SISUSBPtr pSiSUSB, CARD32 reg)
-{
-    return *(pSiSUSB->IOBase + reg);
-}
-
-static void _siswrite(SISUSBPtr pSiSUSB, CARD32 reg, CARD32 data)
-{
-    *(pSiSUSB->IOBase + reg) = data;
-}
-#endif
 
 static CARD8 getsrreg(SISUSBPtr pSiSUSB, CARD8 reg)
 {
@@ -107,19 +96,6 @@ static CARD8 vblank_active_CRT1(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
 {
     return(inSISREG(pSiSUSB, SISINPSTAT) & 0x08); /* Verified */
 }
-
-/* Scanline - unused */
-#if 0
-static CARD16 get_scanline_CRT1(SISUSBPtr pSiSUSB)
-{
-    CARD32 line;
-
-    _siswrite(pSiSUSB, REG_PRIM_CRT_COUNTER, 0x00000001);
-    line = _sisread(pSiSUSB, REG_PRIM_CRT_COUNTER);
-
-    return((CARD16)((line >> 16) & 0x07FF));
-}
-#endif
 #endif /* SIS_ENABLEXV */
 
 /* Helper: Count attributes */
@@ -556,21 +532,6 @@ SISUSBSetupImageVideo(ScreenPtr pScreen)
     return adapt;
 }
 
-#ifdef SIS_ENABLEXV
-#endif
-
-#if 0
-void
-SISUSBUpdateVideoParms(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
-{
-  set_allowswitchcrt(pSiSUSB, pPriv);
-#ifdef SIS_ENABLEXV
-  set_dispmode(pSiSUSB->pScrn, pPriv);
-#endif
-  set_maxencoding(pSiSUSB, pPriv);
-}
-#endif
-
 static int
 SISUSBSetPortAttribute(ScrnInfoPtr pScrn, Atom attribute,
   		    INT32 value, pointer data)
@@ -834,13 +795,6 @@ calc_scale_factor(SISUSBOverlayPtr pOverlay, ScrnInfoPtr pScrn,
 	   pOverlay->pitch /= mult;
 	}
      } else {
-#if 0
-        if(((pOverlay->bobEnable & 0x08) == 0x00) &&
-           (((srcPitch * I) >> 2) > 0xFFF)){
-           pOverlay->bobEnable |= 0x08;
-           srcPitch >>= 1;
-        }
-#endif
         if(((srcPitch * I) >> 2) > 0xFFF) {
            I = (0xFFF * 2 / srcPitch);
            pOverlay->VUSF = 0xFFFF;
@@ -1188,9 +1142,6 @@ set_overlay(SISUSBPtr pSiSUSB, SISUSBOverlayPtr pOverlay, SISUSBPortPrivPtr pPri
 static void
 close_overlay(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
 {
-#if 0
-  int watchdog;
-#endif
 
   if(!(pPriv->overlayStatus)) return;
   pPriv->overlayStatus = FALSE;
@@ -1198,20 +1149,7 @@ close_overlay(SISUSBPtr pSiSUSB, SISUSBPortPrivPtr pPriv)
   setvideoregmask(pSiSUSB, Index_VI_Control_Misc2, 0x00, 0x05);
   setvideoregmask(pSiSUSB, Index_VI_Control_Misc1, 0x00, 0x01);
 
-#if 0
-  watchdog = WATCHDOG_DELAY;
-  while((!vblank_active_CRT1(pSiSUSB, pPriv)) && --watchdog);
-  watchdog = WATCHDOG_DELAY;
-  while(vblank_active_CRT1(pSiSUSB, pPriv) && --watchdog);
-#endif
   setvideoregmask(pSiSUSB, Index_VI_Control_Misc0, 0x00, 0x02);
-#if 0
-  watchdog = WATCHDOG_DELAY;
-  while((!vblank_active_CRT1(pSiSUSB, pPriv)) && --watchdog);
-  watchdog = WATCHDOG_DELAY;
-  while(vblank_active_CRT1(pSiSUSB, pPriv) && --watchdog);
-#endif
-
 }
 #endif
 

@@ -39,10 +39,6 @@
 
 #include "servermd.h"
 
-#if 0
-extern void SiSUSBSync(ScrnInfoPtr pScrn);
-#endif
-
 void SISUSBRefreshArea(ScrnInfoPtr pScrn, int num, BoxPtr pbox);
 void SISUSBDoRefreshArea(ScrnInfoPtr pScrn);
 
@@ -50,10 +46,6 @@ void
 SISUSBRefreshArea(ScrnInfoPtr pScrn, int num, BoxPtr pbox)
 {
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
-
-#if 0
-    if(pSiSUSB->IgnoreRefresh) return;
-#endif
 
 #if X_BYTE_ORDER == X_BIG_ENDIAN
     if(pScrn->bitsPerPixel == 16) {
@@ -134,12 +126,6 @@ SISUSBDoRefreshArea(ScrnInfoPtr pScrn)
 
     Bpp = pScrn->bitsPerPixel >> 3;
     FBPitch = pSiSUSB->ShadowPitch;
-
-#if 0
-    if(pSiSUSB->AccelNeedSync) {
-       SiSUSBSync(pScrn);
-    }
-#endif
 
     src = pSiSUSB->ShadowPtr + (ymin * FBPitch) + (xmin * Bpp);
     dst = pSiSUSB->FbBase + (ymin * FBPitch) + (xmin * Bpp);

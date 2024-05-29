@@ -787,11 +787,6 @@ SiS_SetCRT1ModeRegs(SiS_Private *SiS_Pr, USHORT ModeNo, USHORT ModeIdIndex,
 	USHORT hto = (SiS_GetReg(SiS_Pr,SiS_Pr->SiS_P3d4,0x00) |
 	             ((SiS_GetReg(SiS_Pr,SiS_Pr->SiS_P3c4,0x0b) & 0x03) << 8)) + 5;
 	data = hrs - (hto >> 1) + 3;
-#if 0
-        if(xres <= 800)       data = 0x0020; /* guessed */
-        else if(xres <= 1024) data = 0x0035; /* 1024x768 */
-        else                  data = 0x0048; /* 1280x1024 */
-#endif
   }
   SiS_SetReg(SiS_Pr,SiS_Pr->SiS_P3d4,0x19,(data & 0xFF));
   SiS_SetRegANDOR(SiS_Pr,SiS_Pr->SiS_P3d4,0x1a,0xFC,(data >> 8));
@@ -1283,9 +1278,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
    int            A, B, C, D, E, F, temp, i, j, index, vclkindex;
    DisplayModePtr new = NULL, current = NULL, first = NULL;
    BOOLEAN        IsHDCLK;
-#if 0
-   DisplayModePtr backup = NULL;
-#endif
 
    pSiSUSB->backupmodelist = NULL;
 
@@ -1485,13 +1477,6 @@ SiSUSBBuildBuiltInModeList(ScrnInfoPtr pScrn, BOOLEAN includelcdmodes, BOOLEAN i
       current->VSyncEnd   = ((VRS & ~0x1f) | VRE) + 1;
       if(VRE <= (VRS & 0x1f)) current->VSyncEnd += 32;
       current->VTotal     = E + D + C + F;
-
-#if 0
-      current->VDisplay   = E;
-      current->VSyncStart = E + D;
-      current->VSyncEnd   = E + D + C;
-      current->VTotal     = E + D + C + F;
-#endif
 
 #ifdef TWDEBUG
       xf86DrvMsg(0, X_INFO,

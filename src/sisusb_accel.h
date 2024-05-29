@@ -236,23 +236,6 @@
 
 #define SiSUSBCheckQueue(amount)
 
-#if 0
-      { \
-	CARD32 mcurrent, i=0, ttt = SiSUSBGetSwWP(); \
-	if((ttt + amount) >= pSiSUSB->cmdQueueSize) { \
-	   do { \
-	      mcurrent = SIS_MMIO_IN32(pSiSUSB->IOBase, Q_READ_PTR); \
-	      i++; \
-	   } while((mcurrent > ttt) || (mcurrent < ((ttt + amount) & pSiSUSB->cmdQueueSizeMask))); \
-	} else { \
-	   do { \
-	      mcurrent = SIS_MMIO_IN32(pSiSUSB->IOBase, Q_READ_PTR); \
-	      i++; \
-	   } while((mcurrent > ttt) && (mcurrent < (ttt + amount))); \
-	} \
-      }
-#endif
-
 #define SiSUSBUpdateQueue \
       SiSUSBWriteQueue(tt); \
       ttt += 16; \
