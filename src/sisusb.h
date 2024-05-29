@@ -116,8 +116,6 @@
 
 /* End of configurable stuff --------------------------------- */
 
-#define UNLOCK_ALWAYS		/* Always unlock the registers (should be set!) */
-
 /* Need that for SiSCtrl */
 #define EXTENSION_PROC_ARGS void *
 #include "extnsionst.h" 			/* required */

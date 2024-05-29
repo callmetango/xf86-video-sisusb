@@ -295,9 +295,7 @@ SiSUSBSave(ScrnInfoPtr pScrn, SISUSBRegPtr sisReg)
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     int i;
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
 
     /* Save SR registers */
     for(i = 0x00; i <= 0x3F; i++) {
@@ -348,9 +346,7 @@ SiSUSBRestore(ScrnInfoPtr pScrn, SISUSBRegPtr sisReg)
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
     int i,temp;
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
 
     /* Wait for accelerator to finish on-going drawing operations. */
     inSISIDXREG(pSiSUSB, SISSR, 0x1E, temp);
@@ -427,9 +423,7 @@ SiSUSBRestoreBridge(ScrnInfoPtr pScrn, SISUSBRegPtr sisReg)
    SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
    int i;
 
-#ifdef UNLOCK_ALWAYS
    sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
 
    for(i = 0x30; i <= 0x3b; i++) {
       if(i == 0x34) continue;

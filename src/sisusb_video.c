@@ -251,9 +251,7 @@ SISUSBResetVideo(ScrnInfoPtr pScrn)
     SISUSBPortPrivPtr pPriv = GET_PORT_PRIVATE(pScrn);
 
     /* Unlock registers */
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
     if(getvideoreg(pSiSUSB, Index_VI_Passwd) != 0xa1) {
         setvideoreg(pSiSUSB, Index_VI_Passwd, 0x86);
         if(getvideoreg(pSiSUSB, Index_VI_Passwd) != 0xa1)
@@ -323,10 +321,7 @@ set_disptype_regs(ScrnInfoPtr pScrn, SISUSBPortPrivPtr pPriv)
 {
     SISUSBPtr pSiSUSB = SISUSBPTR(pScrn);
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
-
     setsrregmask(pSiSUSB, 0x06, 0x00, 0xc0);  /* only overlay -> CRT1 */
     setsrregmask(pSiSUSB, 0x32, 0x00, 0xc0);
 }

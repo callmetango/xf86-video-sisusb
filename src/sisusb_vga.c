@@ -66,9 +66,7 @@ SISUSB300Init(ScrnInfoPtr pScrn, DisplayModePtr mode)
     pSiSUSB->scrnPitch = pSiSUSB->scrnPitch2 = pSiSUSB->scrnOffset;
     if(realmode->Flags & V_INTERLACE) pSiSUSB->scrnPitch <<= 1;
 
-#ifdef UNLOCK_ALWAYS
     outSISIDXREG(pSiSUSB, SISSR, 0x05, 0x86);
-#endif
 
     switch(pSiSUSB->CurrentLayout.bitsPerPixel) {
         case 8:

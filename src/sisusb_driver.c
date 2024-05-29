@@ -485,9 +485,7 @@ SISUSBDisplayPowerManagementSet(ScrnInfoPtr pScrn, int PowerManagementMode, int 
     xf86DrvMsgVerb(pScrn->scrnIndex, X_INFO, 4,
           "SISUSBDisplayPowerManagementSet(%d)\n",PowerManagementMode);
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
 
    switch (PowerManagementMode) {
 
@@ -1530,9 +1528,7 @@ SISUSBRestore(ScrnInfoPtr pScrn)
 
     SiSUSBVGAProtect(pScrn, TRUE);
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL,NULL);
-#endif
 
     /* First, restore CRT1 on/off and VB connection registers */
     outSISIDXREG(pSiSUSB,SISCR, 0x32, pSiSUSB->oldCR32);
@@ -1658,9 +1654,7 @@ SISUSBScreenInit(ScreenPtr pScreen, int argc, char **argv)
 
     SiSUSB_SiSFB_Lock(pScrn, TRUE);
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
 
     /* Save the current state */
     SISUSBSave(pScrn);
@@ -2049,10 +2043,7 @@ SISUSBAdjustFrame(ScrnInfoPtr pScrn, int x, int y)
        }
     }
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
-
     SISUSBSetStartAddressCRT1(pSiSUSB, base);
 }
 
@@ -2384,9 +2375,7 @@ void SiSUSBPreSetMode(ScrnInfoPtr pScrn, DisplayModePtr mode, int viewmode)
        pSiSUSB->IsCustom = TRUE;
     }
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);    /* Unlock Registers */
-#endif
 
     inSISIDXREG(pSiSUSB,SISCR, 0x33, CR33);
 
@@ -2443,9 +2432,7 @@ SiSUSBPostSetMode(ScrnInfoPtr pScrn, SISUSBRegPtr sisReg)
 
     pSiSUSB->CRT1isoff = pSiSUSB->CRT1off;
 
-#ifdef UNLOCK_ALWAYS
     sisusbSaveUnlockExtRegisterLock(pSiSUSB, NULL, NULL);
-#endif
 
     andSISIDXREG(pSiSUSB, SISCR,pSiSUSB->myCR63,0xBF);
     andSISIDXREG(pSiSUSB, SISSR,0x1f,0x3f);
@@ -2668,8 +2655,6 @@ void
 sisusbRestoreExtRegisterLock(SISUSBPtr pSiSUSB, UChar reg1, UChar reg2)
 {
     /* restore lock */
-#ifndef UNLOCK_ALWAYS
     outSISIDXREG(pSiSUSB, SISSR, 0x05, reg1 == 0xA1 ? 0x86 : 0x00);
-#endif
 }
 
