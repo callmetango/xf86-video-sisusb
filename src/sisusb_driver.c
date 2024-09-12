@@ -193,22 +193,10 @@ SISUSBFreeRec(ScrnInfoPtr pScrn)
     }
 }
 
-static void
-SISUSBErrorLog(ScrnInfoPtr pScrn, const char *format, ...)
-{
-    va_list ap;
-    static const char *str = "**************************************************\n";
+#define MSG_DELIM "**************************************************\n"
 
-    va_start(ap, format);
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "%s", str);
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-    	"                      ERROR:\n");
-    xf86VDrvMsgVerb(pScrn->scrnIndex, X_ERROR, 1, format, ap);
-    va_end(ap);
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
-    	"                  END OF MESSAGE\n");
-    xf86DrvMsg(pScrn->scrnIndex, X_ERROR, "%s", str);
-}
+#define SISUSBErrorLog(pScrn,format,...) \
+    xf86DrvMsgVerb(pScrn->scrnIndex, X_ERROR, 1, format __VA_OPT__(,) __VA_ARGS__)
 
 static int
 SiSUSBFindDuplicate(int myminor, int *minorArray, int numDevSections)
