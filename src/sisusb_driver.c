@@ -848,7 +848,7 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
     {
 
        sisusbfb_info *mysisfbinfo = NULL;
-       CARD32     sisfbinfosize = 0, sisfbversion;
+       CARD32     sisfbinfosize = 0;
        int        fd, i;
        char       name[16];
 
@@ -879,11 +879,6 @@ SISUSBPreInit(ScrnInfoPtr pScrn, int flags)
 	     if(gotit) {
 
 	        if(mysisfbinfo->sisusbfb_id == SISUSBFB_ID) {
-
-		   sisfbversion = (mysisfbinfo->sisusbfb_version << 16) |
-		                  (mysisfbinfo->sisusbfb_revision << 8) |
-			          (mysisfbinfo->sisusbfb_patchlevel);
-
 
 		   if(mysisfbinfo->sisusbfb_minor  == pSiSUSB->sisusb_minor) {
 
